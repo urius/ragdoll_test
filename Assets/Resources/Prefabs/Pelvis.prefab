@@ -139,7 +139,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 970362323679158900}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -149,7 +149,7 @@ Transform:
   - {fileID: 7553627158882165222}
   - {fileID: 5656560432783256252}
   m_Father: {fileID: 3836580822455312711}
-  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &41551738066100081
 Animator:
   serializedVersion: 7
@@ -331,6 +331,7 @@ GameObject:
   - component: {fileID: 8319521487852339180}
   - component: {fileID: 431543925344851020}
   - component: {fileID: 327714382582904983}
+  - component: {fileID: 3944117546987586333}
   m_Layer: 0
   m_Name: Pelvis
   m_TagString: Untagged
@@ -473,7 +474,7 @@ ConfigurableJoint:
   m_SlerpDrive:
     serializedVersion: 4
     positionSpring: 5000
-    positionDamper: 100
+    positionDamper: 600
     maximumForce: 3.4028233e+38
     useAcceleration: 0
   m_ProjectionMode: 0
@@ -502,6 +503,10 @@ MonoBehaviour:
   _lookToBehaviour: {fileID: 8319521487852339180}
   _animator: {fileID: 41551738066100081}
   _velocityDamping: {fileID: 327714382582904983}
+  _mainRigidbody: {fileID: 825557744657218911}
+  _allMeshRenderers: {fileID: 3944117546987586333}
+  _redTeamColor: {r: 0.9622642, g: 0.69648504, b: 0.5855287, a: 1}
+  _blueTeamColor: {r: 0.67105734, g: 0.7010645, b: 0.9811321, a: 1}
 --- !u!114 &8319521487852339180
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -551,8 +556,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9167294b06445d29def9d83bf7bdf89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Src.Components.VerticalDamping
-  _verticalDampingFactor: 0.2
-  _horizontalDampingFactor: 1
+  _verticalDampingFactor: 1
+  _horizontalDampingFactor: 0.9
+--- !u!114 &3944117546987586333
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1362735029370749373}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b8947bc15214d7bb641bd080d439342, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Src.Components.AllMeshRenderers
 --- !u!1 &1439431349379747689
 GameObject:
   m_ObjectHideFlags: 0
@@ -1135,7 +1152,7 @@ Transform:
   m_GameObject: {fileID: 2488433017527452350}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -2.01, z: -0.3800001}
+  m_LocalPosition: {x: 0, y: -2.01, z: 0.3800001}
   m_LocalScale: {x: 1, y: 0.5, z: 1.6}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2441,7 +2458,7 @@ Transform:
   m_GameObject: {fileID: 5242891368444984836}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1, y: 0, z: 0}
+  m_LocalPosition: {x: -1, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2474,7 +2491,7 @@ Transform:
   m_GameObject: {fileID: 5247588517251681930}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.52, y: 0, z: 0}
+  m_LocalPosition: {x: 1.52, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2508,7 +2525,7 @@ Transform:
   m_GameObject: {fileID: 5320351386637612895}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -2.01, z: -0.3800001}
+  m_LocalPosition: {x: 0, y: -2.01, z: 0.3800001}
   m_LocalScale: {x: 1, y: 0.5, z: 1.6}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2595,7 +2612,7 @@ Transform:
   m_GameObject: {fileID: 5398809794795734401}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1, y: 0, z: 0}
+  m_LocalPosition: {x: 1, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2791,7 +2808,7 @@ Transform:
   m_GameObject: {fileID: 5695598525765347028}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.52, y: 0, z: 0}
+  m_LocalPosition: {x: -1.52, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3495,7 +3512,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7391656551113682192}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 793a3aa9cd3f446d9a26eda7417ef39a, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -4399,7 +4416,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8854023637677071210}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 793a3aa9cd3f446d9a26eda7417ef39a, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0

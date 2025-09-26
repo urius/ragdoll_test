@@ -1,4 +1,5 @@
 using Src.Data;
+using UnityEngine;
 
 namespace Src.Model
 {
@@ -7,5 +8,8 @@ namespace Src.Model
         FootballerUnitData UnitData { get; }
 
         void SetupData(TeamKey team, int teamInnerIndex);
+        void SetTargetDirection(Vector3 directionVector);
+        void SetMovingState();
+        void SetStandingState();
     }
 }

@@ -19,6 +19,7 @@ namespace Src.Presenters
         private bool _targetUnitIsLocked;
 
         public Vector3 Forward => transform.forward;
+        public Vector3 Right => transform.right;
 
         [Inject]
         public void Setup(PlayerControlledUnitProvider playerControlledUnitProvider)
@@ -34,7 +35,11 @@ namespace Src.Presenters
             if (_targetUnit != null)
             {
                 MoveToTarget();
-                RotateCameraToMouse();
+
+                if (_targetUnitIsLocked)
+                {
+                    RotateCameraToMouse();
+                }
             }
         }
 
@@ -49,7 +54,7 @@ namespace Src.Presenters
                 transform.position = Vector3.Lerp(transform.position, _targetUnit.transform.position, 5 * Time.deltaTime);
 
                 var targetRotation = _targetUnit.transform.rotation.eulerAngles;
-                targetRotation.y += 180;
+                targetRotation.x = targetRotation.z = 0;
                 transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(targetRotation), 3 * Time.deltaTime);
                 
                 if ((_targetUnit.transform.position - transform.position).sqrMagnitude < 0.3f 
@@ -62,8 +67,6 @@ namespace Src.Presenters
         
         private void RotateCameraToMouse()
         {
-            if (_targetUnitIsLocked == false) return;
-            
             var mouse = Mouse.current;
             
             var eulerRotation = transform.localRotation.eulerAngles;

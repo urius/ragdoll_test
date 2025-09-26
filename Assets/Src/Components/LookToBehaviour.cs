@@ -14,6 +14,11 @@ namespace Src.Components
         public void SetTargetLookFromPosition(Vector3 targetPosition)
         {
             var lookVector = transform.position - targetPosition;
+            SetTargetLookVector(lookVector);
+        }
+        
+        public void SetTargetLookVector(Vector3 lookVector)
+        {
             lookVector.y = 0;
             var lookRotation = Quaternion.LookRotation(lookVector);
             

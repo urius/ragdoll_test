@@ -12,8 +12,9 @@ namespace Src.Components
             for (var i = 0; i < _pairs.Length; i++)
             {
                 var transformJointPair = _pairs[i];
-
-                transformJointPair.ConfigurableJoint.targetRotation = transformJointPair.Transform.localRotation;
+                
+                transformJointPair.ConfigurableJoint.targetRotation =
+                    Quaternion.Inverse(transformJointPair.Transform.localRotation);
             }
         }
 

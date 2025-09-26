@@ -22,9 +22,15 @@ namespace Src.Factories
             _objectResolver = objectResolver;
         }
         
-        public IFootballerUnit Create(Vector3 position)
+        public IFootballerUnit Create(Vector3 position, Quaternion rotation)
         {
-            var unit = _objectResolver.Instantiate(_prefabsProvider.FootballerUnit, position, Quaternion.identity);
+            var unit = _objectResolver.Instantiate(_prefabsProvider.FootballerUnit);
+            
+            var transform = unit.transform;
+            position.y = transform.position.y;
+            transform.position = position;
+            transform.rotation = rotation;
+            
             _gameUnitsHolder.AddFootballer(unit);
 
             return unit;
@@ -33,6 +39,6 @@ namespace Src.Factories
 
     public interface IFootballerUnitFactory
     {
-        public IFootballerUnit Create(Vector3 position);
+        public IFootballerUnit Create(Vector3 position, Quaternion quaternion);
     }
 }

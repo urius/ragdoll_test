@@ -10,6 +10,9 @@ namespace Src.Components
         
         private Rigidbody _rigidbody;
 
+        public float VerticalDampingFactor => _verticalDampingFactor;
+        public float HorizontalDampingFactor => _horizontalDampingFactor;
+
         private void Awake()
         {
             _rigidbody = GetComponent<Rigidbody>();
