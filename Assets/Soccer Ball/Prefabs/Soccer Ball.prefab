@@ -9,11 +9,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4935240531098310}
+  - component: {fileID: 6320094262050857827}
   - component: {fileID: 33935909779426952}
   - component: {fileID: 23737651838244920}
   - component: {fileID: 135134225773752490}
   - component: {fileID: 1199665150887521535}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Soccer Ball
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -35,6 +36,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6320094262050857827
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1975457108487340}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49a424cdce8b45df8ba287d9f8757a05, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Src.Components.BallFacade
 --- !u!33 &33935909779426952
 MeshFilter:
   m_ObjectHideFlags: 0
