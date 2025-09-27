@@ -1,3 +1,4 @@
+using Src.Extensions;
 using UnityEngine;
 
 namespace Src.Components
@@ -15,10 +16,7 @@ namespace Src.Components
         {
             foreach (var meshRenderer in _allRenderers)
             {
-                var propertyBlock = new MaterialPropertyBlock();
-                meshRenderer.GetPropertyBlock(propertyBlock);
-                propertyBlock.SetColor("_Color", color);
-                meshRenderer.SetPropertyBlock(propertyBlock);
+                meshRenderer.SetColor(color);
             }
         }
     }

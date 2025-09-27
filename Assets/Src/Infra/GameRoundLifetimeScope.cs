@@ -25,6 +25,8 @@ namespace Src.Infra
             builder.Register<FootballerUnitFactory>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<PlayerControlledUnitProvider>(Lifetime.Singleton);
 
+            builder.RegisterEntryPoint<GoalGatesProvider>();
+            builder.RegisterEntryPoint<GameController>();
             builder.RegisterEntryPoint<FootballersController>();
         }
     }

@@ -43,7 +43,7 @@ namespace Src.Controllers
             for (var i = 0; i < 3; i++)
             {
                 var unit = CreateFootballerUnit(TeamKey.Red, i);
-                if(i == 0) _playerControlledUnitProvider.SetTargetUnit(unit);
+                if (i == 0) _playerControlledUnitProvider.SetTargetUnit(unit);
                 
                 CreateFootballerUnit(TeamKey.Blue, i);
             }
