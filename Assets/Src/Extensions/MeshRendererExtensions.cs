@@ -8,7 +8,7 @@ namespace Src.Extensions
         {
             var propertyBlock = new MaterialPropertyBlock();
             meshRenderer.GetPropertyBlock(propertyBlock);
-            propertyBlock.SetColor("_Color", color);
+            propertyBlock.SetColor("_BaseColor", color);
             meshRenderer.SetPropertyBlock(propertyBlock);
         }
     }
