@@ -5,7 +5,10 @@ namespace Src.Components
     public class LookToBehaviour : MonoBehaviour
     {
         private ConfigurableJoint _joint;
+        private Vector3 _targetLookVector;
 
+        public Vector3 TargetLookVector => _targetLookVector;
+        
         private void Awake()
         {
             _joint = GetComponent<ConfigurableJoint>();
@@ -21,6 +24,8 @@ namespace Src.Components
         {
             lookVector.y = 0;
             var lookRotation = Quaternion.LookRotation(lookVector);
+
+            _targetLookVector = lookVector;
             
             _joint.targetRotation = Quaternion.Inverse(lookRotation);
         }

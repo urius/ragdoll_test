@@ -40,7 +40,7 @@ namespace Src.Controllers
 
         private void CreateFootballers()
         {
-            for (var i = 0; i < 3; i++)
+            for (var i = 0; i < _startPointsProvider.PointsAmount; i++)
             {
                 var unit = CreateFootballerUnit(TeamKey.Red, i);
                 if (i == 0) _playerControlledUnitProvider.SetTargetUnit(unit);

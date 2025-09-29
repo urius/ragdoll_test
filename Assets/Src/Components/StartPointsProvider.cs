@@ -7,6 +7,8 @@ namespace Src.Components
     {
         [SerializeField] private Transform[] _points;
 
+        public int PointsAmount => _points.Length;
+
         public Vector3 GetPointPosition(int pointIndex, TeamKey teamKey)
         {
             var result = Vector3.zero;
@@ -26,6 +28,7 @@ namespace Src.Components
 
     public interface IStartPointsProvider
     {
+        int PointsAmount { get; }
         Vector3 GetPointPosition(int pointIndex, TeamKey teamKey);
     }
 }

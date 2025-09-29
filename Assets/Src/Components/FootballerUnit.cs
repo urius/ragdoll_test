@@ -15,6 +15,8 @@ namespace Src.Components
         [SerializeField] private Color _redTeamColor;
         [SerializeField] private Color _blueTeamColor;
         
+        private const float DeltaVelocity = 0.2f;
+        
         private static readonly int IsRunning = Animator.StringToHash("IsRunning");
         private static readonly int IsIdle = Animator.StringToHash("IsIdle");
 
@@ -44,12 +46,19 @@ namespace Src.Components
 
         private void FixedUpdate()
         {
-            UpdateCurrentVelocityValue();
+            DecreaseVelocityIfNeeded();
             
             if (_targetVelocity > 0)
             {
-                _mainRigidbody.linearVelocity =
-                    _currentVelocity > 0 ? ProjectedForward * _currentVelocity : Vector3.zero;
+                var projectedFroward = ProjectedForward;
+                var angle = Vector3.Angle(_lookToBehaviour.TargetLookVector, projectedFroward);
+                if (angle < 90)
+                {
+                    IncreaseVelocityIfNeeded();
+                    
+                    _mainRigidbody.linearVelocity =
+                        _currentVelocity > 0 ? ProjectedForward * _currentVelocity : Vector3.zero;
+                }
             }
         }
 
@@ -106,18 +115,20 @@ namespace Src.Components
             }
         }
 
-        private void UpdateCurrentVelocityValue()
+        private void IncreaseVelocityIfNeeded()
         {
-            const float deltaVelocity = 0.2f;
-            
             if (_currentVelocity < _targetVelocity)
             {
-                _currentVelocity += deltaVelocity;
+                _currentVelocity += DeltaVelocity;
                 ClampVelocity();
             }
-            else if (_targetVelocity <= 0 && _currentVelocity > 0)
+        }
+
+        private void DecreaseVelocityIfNeeded()
+        {
+            if (_targetVelocity <= 0 && _currentVelocity > 0)
             {
-                _currentVelocity -= deltaVelocity;
+                _currentVelocity -= DeltaVelocity;
                 ClampVelocity();
             }
         }
