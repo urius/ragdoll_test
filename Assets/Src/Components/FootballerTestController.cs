@@ -23,13 +23,13 @@ namespace Src.Components
                 
                 if (_isTargetTransformSet == false)
                 {
-                    _presenter.SetState(FootballerState.Moving);
+                    _presenter.SetState(FootballerMoveState.Moving);
                     _isTargetTransformSet = true;
                 }
             }
             else if (_isTargetTransformSet)
             {
-                _presenter.SetState(FootballerState.Standing);
+                _presenter.SetState(FootballerMoveState.Standing);
                 _isTargetTransformSet = false;
             }
         }

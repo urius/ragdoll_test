@@ -701,7 +701,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: be931cfe6a354c22ac87704aa5ce7fe7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Src.Components.LootToTarget
-  _target: {fileID: 1830153352}
 --- !u!1 &747449453
 GameObject:
   m_ObjectHideFlags: 0
@@ -1349,6 +1348,7 @@ MonoBehaviour:
   _startPointsProvider: {fileID: 1410123147}
   _prefabsProvider: {fileID: 11400000, guid: 7fa5b898feb9f4a4c8ec63588d911242, type: 2}
   _cameraPresenter: {fileID: 1725155342}
+  _ballFacade: {fileID: 1830153357}
 --- !u!4 &1379866207
 Transform:
   m_ObjectHideFlags: 0
@@ -1562,7 +1562,7 @@ PrefabInstance:
       objectReference: {fileID: 1670693632}
     - target: {fileID: 5644654544620524262, guid: 7c21f7374f97c4482b2b51faa34f840f, type: 3}
       propertyPath: m_Name
-      value: Goal Gates
+      value: Goal Gates Red
       objectReference: {fileID: 0}
     - target: {fileID: 6815554549381839870, guid: 7c21f7374f97c4482b2b51faa34f840f, type: 3}
       propertyPath: m_Mesh
@@ -1570,7 +1570,7 @@ PrefabInstance:
       objectReference: {fileID: 1670693632}
     - target: {fileID: 6815554549381839870, guid: 7c21f7374f97c4482b2b51faa34f840f, type: 3}
       propertyPath: m_VersionIndex
-      value: 5795
+      value: 5858
       objectReference: {fileID: 0}
     - target: {fileID: 8190244632454469585, guid: 7c21f7374f97c4482b2b51faa34f840f, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2030,11 +2030,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Src.Presenters.CameraPresenter
   _camera: {fileID: 963194227}
---- !u!4 &1830153352 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4935240531098310, guid: ec3e8f3ed27e2244caaedaf589590a03, type: 3}
+--- !u!114 &1830153357 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6320094262050857827, guid: ec3e8f3ed27e2244caaedaf589590a03, type: 3}
   m_PrefabInstance: {fileID: 6019481440985162606}
   m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49a424cdce8b45df8ba287d9f8757a05, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Src.Components.BallFacade
 --- !u!4 &1909833226 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8190244632454469585, guid: 7c21f7374f97c4482b2b51faa34f840f, type: 3}
@@ -2406,7 +2412,7 @@ PrefabInstance:
       objectReference: {fileID: 385014684}
     - target: {fileID: 6815554549381839870, guid: 7c21f7374f97c4482b2b51faa34f840f, type: 3}
       propertyPath: m_VersionIndex
-      value: 5795
+      value: 5858
       objectReference: {fileID: 0}
     - target: {fileID: 8190244632454469585, guid: 7c21f7374f97c4482b2b51faa34f840f, type: 3}
       propertyPath: m_LocalPosition.x

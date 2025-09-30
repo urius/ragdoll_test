@@ -1,8 +1,9 @@
+using Src.Providers;
 using UnityEngine;
 
 namespace Src.Components
 {
-    public class BallFacade : MonoBehaviour
+    public class BallFacade : MonoBehaviour, IBallPositionProvider
     {
         private void OnTriggerEnter(Collider other)
         {
@@ -13,5 +14,7 @@ namespace Src.Components
                 Debug.Log("!!!!!GOAAAAAAL!!!!!");
             }
         }
+
+        public Vector3 Position => transform.position;
     }
 }

@@ -1,6 +1,6 @@
 namespace Src.Data
 {
-    public enum FootballerState
+    public enum FootballerMoveState
     {
         Undefined,
         Standing,

@@ -25,10 +25,12 @@ namespace Src.Components
         private float _targetVelocity = 0;
         private float _currentVelocity = 0;
 
+        public FootballerBehaviourStrategy BehaviourStrategy { get; set; }
         public Vector3 TargetMoveToPoint { get; private set; }
-        public FootballerState State { get; private set; }
-        public FootballerUnitData UnitData => _unitData;
-        
+        public FootballerMoveState MoveState { get; private set; }
+        public TeamKey Team => _unitData.Team;
+        public Vector3 Position => transform.position;
+
         private Vector3 ProjectedForward
         {
             get
@@ -59,6 +61,8 @@ namespace Src.Components
                     _mainRigidbody.linearVelocity =
                         _currentVelocity > 0 ? ProjectedForward * _currentVelocity : Vector3.zero;
                 }
+
+                ProcessMoveFinishedIfNeeded();
             }
         }
 
@@ -74,6 +78,15 @@ namespace Src.Components
             _lookToBehaviour.SetTargetLookVector(directionVector);
         }
 
+        public void SetMovingToTargetPointState(Vector3 targetPoint)
+        {
+            SetTargetMoveToPoint(targetPoint);
+            
+            if (IsOnTargetPoint()) return;
+            
+            SetMovingState();
+        }
+
         public void SetTargetMoveToPoint(Vector3 targetPoint)
         {
             TargetMoveToPoint = targetPoint;
@@ -83,28 +96,28 @@ namespace Src.Components
 
         public void SetMovingState()
         {
-            SetState(FootballerState.Moving);
+            SetState(FootballerMoveState.Moving);
         }
 
         public void SetStandingState()
         {
-            SetState(FootballerState.Standing);
+            SetState(FootballerMoveState.Standing);
         }
 
-        public void SetState(FootballerState state)
+        public void SetState(FootballerMoveState moveState)
         {
-            if (State == state) return;
+            if (MoveState == moveState) return;
             
-            State = state;
+            MoveState = moveState;
             
-            switch (state)
+            switch (moveState)
             {
-                case FootballerState.Moving:
+                case FootballerMoveState.Moving:
                     _velocityDamping.SetHorizontalDampingFactor(1);
                     _animator.SetTrigger(IsRunning);
                     _targetVelocity = 15f;
                     break;
-                case FootballerState.Standing:
+                case FootballerMoveState.Standing:
                     _velocityDamping.SetHorizontalDampingFactor(_defaultHorizontalDampingFactor);
                     _animator.SetTrigger(IsIdle);
                     _targetVelocity = 0f;
@@ -113,6 +126,27 @@ namespace Src.Components
                     _velocityDamping.SetHorizontalDampingFactor(_defaultHorizontalDampingFactor);
                     break;
             }
+        }
+
+        public bool IsOnTargetPoint()
+        {
+            return GetFlatDistance(TargetMoveToPoint, transform.position) < 1f;
+        }
+
+        private void ProcessMoveFinishedIfNeeded()
+        {
+            if (MoveState == FootballerMoveState.Moving 
+                && IsOnTargetPoint())
+            {
+                SetState(FootballerMoveState.Standing);
+            }
+        }
+
+        private double GetFlatDistance(Vector3 targetMoveToPoint, Vector3 transformPosition)
+        {
+            targetMoveToPoint.y = transformPosition.y = 0;
+
+            return Vector3.Distance(targetMoveToPoint, transformPosition);
         }
 
         private void IncreaseVelocityIfNeeded()

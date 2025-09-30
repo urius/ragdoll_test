@@ -14,12 +14,14 @@ namespace Src.Infra
         [SerializeField] private StartPointsProvider _startPointsProvider;
         [SerializeField] private PrefabsProvider _prefabsProvider;
         [SerializeField] private CameraPresenter _cameraPresenter;
+        [SerializeField] private BallFacade _ballFacade;
         
         protected override void Configure(IContainerBuilder builder)
         {
             builder.RegisterInstance<IStartPointsProvider>(_startPointsProvider);
             builder.RegisterInstance<IPrefabsProvider>(_prefabsProvider);
             builder.RegisterInstance(_cameraPresenter).AsImplementedInterfaces();
+            builder.RegisterInstance(_ballFacade).AsImplementedInterfaces();
             
             builder.Register<GameUnitsProvider>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<FootballerUnitFactory>(Lifetime.Singleton).AsImplementedInterfaces();

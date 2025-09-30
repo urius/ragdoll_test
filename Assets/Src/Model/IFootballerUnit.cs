@@ -5,11 +5,15 @@ namespace Src.Model
 {
     public interface IFootballerUnit
     {
-        FootballerUnitData UnitData { get; }
+        FootballerBehaviourStrategy BehaviourStrategy { get; set; }
+        TeamKey Team { get; }
+        Vector3 Position { get; }
 
         void SetupData(TeamKey team, int teamInnerIndex);
         void SetTargetDirection(Vector3 directionVector);
         void SetMovingState();
+        void SetMovingToTargetPointState(Vector3 targetPoint);
         void SetStandingState();
+        bool IsOnTargetPoint();
     }
 }

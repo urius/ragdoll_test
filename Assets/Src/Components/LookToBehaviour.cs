@@ -16,7 +16,7 @@ namespace Src.Components
 
         public void SetTargetLookFromPosition(Vector3 targetPosition)
         {
-            var lookVector = transform.position - targetPosition;
+            var lookVector = targetPosition - transform.position;
             SetTargetLookVector(lookVector);
         }
         
