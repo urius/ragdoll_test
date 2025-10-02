@@ -12,24 +12,49 @@ namespace Src.Components
         [SerializeField] private VelocityDamping _velocityDamping;
         [SerializeField] private Rigidbody _mainRigidbody;
         [SerializeField] private AllMeshRenderers _allMeshRenderers;
+        [SerializeField] private HitTheBallState _hitTheBallState;
         [SerializeField] private Color _redTeamColor;
         [SerializeField] private Color _blueTeamColor;
+        [SerializeField] private FootCollisionNotifierComponent[] _footCollisionNotifiers;
         
         private const float DeltaVelocity = 0.2f;
-        
-        private static readonly int IsRunning = Animator.StringToHash("IsRunning");
-        private static readonly int IsIdle = Animator.StringToHash("IsIdle");
+
+        private static readonly int MoveStateParamKey = Animator.StringToHash("MoveState");
+        private static readonly int IsIdle = 0;
+        private static readonly int IsRunning = 1;
+        private static readonly int IsHittingTheBallRight = 2;
+        private static readonly int IsHittingTheBallLeft = 3;
 
         private float _defaultHorizontalDampingFactor = 0.9f;
         private FootballerUnitData _unitData;
         private float _targetVelocity = 0;
         private float _currentVelocity = 0;
+        private FootballerMoveState _nextMoveState = FootballerMoveState.Standing;
 
-        public FootballerBehaviourStrategy BehaviourStrategy { get; set; }
+        public FootballerRole Role { get; set; }
         public Vector3 TargetMoveToPoint { get; private set; }
+        public Vector3 ForwardProjected {
+            get
+            {
+                var result = transform.forward;
+                result.y = 0;
+                return result;
+            }
+        }
         public FootballerMoveState MoveState { get; private set; }
         public TeamKey Team => _unitData.Team;
         public Vector3 Position => transform.position;
+        public Vector3 PositionProjected
+        {
+            get
+            {
+                var result = transform.position;
+                result.y = 0;
+                return result;
+            }
+        }
+
+        public bool IsHittingTheBallAnimationPlaying => _hitTheBallState.IsHitting;
 
         private Vector3 ProjectedForward
         {
@@ -41,9 +66,13 @@ namespace Src.Components
             }
         }
 
+        private Vector3 _requestedHitDirection;
+
         private void Awake()
         {
             _defaultHorizontalDampingFactor = _velocityDamping.HorizontalDampingFactor;
+
+            Subscribe();
         }
 
         private void FixedUpdate()
@@ -52,9 +81,11 @@ namespace Src.Components
             
             if (_targetVelocity > 0)
             {
+                _hitTheBallState.ResetHitState();
+                
                 var projectedFroward = ProjectedForward;
                 var angle = Vector3.Angle(_lookToBehaviour.TargetLookVector, projectedFroward);
-                if (angle < 90)
+                if (angle < 35)
                 {
                     IncreaseVelocityIfNeeded();
                     
@@ -104,9 +135,28 @@ namespace Src.Components
             SetState(FootballerMoveState.Standing);
         }
 
-        public void SetState(FootballerMoveState moveState)
+        public void SetHittingBallStateRightLeg(Vector3 hitDirection)
+        {
+            _requestedHitDirection = hitDirection;
+            SetState(FootballerMoveState.HittingTheBallRight);
+        }
+
+        public void SetHittingBallStateLeftLeg(Vector3 hitDirection)
+        {
+            _requestedHitDirection = hitDirection;
+            SetState(FootballerMoveState.HittingTheBallLeft);
+        }
+
+        public void SetState(FootballerMoveState moveState, bool force = false)
         {
             if (MoveState == moveState) return;
+
+            if (force == false 
+                && MoveState is FootballerMoveState.HittingTheBallRight or FootballerMoveState.HittingTheBallLeft)
+            {
+                _nextMoveState = moveState;
+                return;
+            }
             
             MoveState = moveState;
             
@@ -114,15 +164,26 @@ namespace Src.Components
             {
                 case FootballerMoveState.Moving:
                     _velocityDamping.SetHorizontalDampingFactor(1);
-                    _animator.SetTrigger(IsRunning);
+                    _hitTheBallState.ResetHitState();
+                    _animator.SetInteger(MoveStateParamKey, IsRunning);
                     _targetVelocity = 15f;
                     break;
                 case FootballerMoveState.Standing:
                     _velocityDamping.SetHorizontalDampingFactor(_defaultHorizontalDampingFactor);
-                    _animator.SetTrigger(IsIdle);
+                    _hitTheBallState.ResetHitState();
+                    _animator.SetInteger(MoveStateParamKey, IsIdle);
+                    _targetVelocity = 0f;
+                    break;
+                case FootballerMoveState.HittingTheBallRight:
+                    _animator.SetInteger(MoveStateParamKey, IsHittingTheBallRight);
+                    _targetVelocity = 0f;
+                    break;
+                case FootballerMoveState.HittingTheBallLeft:
+                    _animator.SetInteger(MoveStateParamKey, IsHittingTheBallLeft);
                     _targetVelocity = 0f;
                     break;
                 default:
+                    _hitTheBallState.ResetHitState();
                     _velocityDamping.SetHorizontalDampingFactor(_defaultHorizontalDampingFactor);
                     break;
             }
@@ -131,6 +192,29 @@ namespace Src.Components
         public bool IsOnTargetPoint()
         {
             return GetFlatDistance(TargetMoveToPoint, transform.position) < 1f;
+        }
+
+        private void Subscribe()
+        {
+            _hitTheBallState.HitTheBallAnimationEnded += OnHitTheBallAnimationEnded;
+            foreach (var footCollisionNotifier in _footCollisionNotifiers)
+            {
+                footCollisionNotifier.BallCollisionEnter += OnBallCollisionEnter;
+            }
+        }
+
+        private void OnBallCollisionEnter(BallFacade ballFacade)
+        {
+            if (_hitTheBallState.IsHitting)
+            {
+                ballFacade.SetLinearVelocity(_requestedHitDirection);
+            }
+        }
+
+        private void OnHitTheBallAnimationEnded()
+        {
+            SetState(_nextMoveState, force: true);
+            _nextMoveState = FootballerMoveState.Standing;
         }
 
         private void ProcessMoveFinishedIfNeeded()

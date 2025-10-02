@@ -4,6 +4,8 @@ namespace Src.Data
     {
         Undefined,
         Standing,
+        HittingTheBallRight,
+        HittingTheBallLeft,
         Moving,
     }
 }

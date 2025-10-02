@@ -8,7 +8,7 @@ using VContainer;
 
 namespace Src.Presenters
 {
-    public class CameraPresenter : MonoBehaviour, ICameraDirectionProvider
+    public class CameraContainerPresenter : MonoBehaviour, ICameraDirectionProvider
     {
         [SerializeField] private Camera _camera;
 

@@ -124,6 +124,7 @@ GameObject:
   - component: {fileID: 8350260457694938004}
   - component: {fileID: 1590508349159250446}
   - component: {fileID: 4405653119275837788}
+  - component: {fileID: 5555770411208349744}
   m_Layer: 0
   m_Name: Pelvis_Animation
   m_TagString: Untagged
@@ -227,6 +228,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eca7421e5bd24d1db8597570faf7a079, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Src.Components.HideAllChildrenMeshRenderers
+--- !u!114 &5555770411208349744
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 970362323679158900}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75a2826ec051452e8783e91d09d9d986, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Src.Components.HitTheBallState
 --- !u!1 &1075570476837026665
 GameObject:
   m_ObjectHideFlags: 0
@@ -505,8 +518,12 @@ MonoBehaviour:
   _velocityDamping: {fileID: 327714382582904983}
   _mainRigidbody: {fileID: 825557744657218911}
   _allMeshRenderers: {fileID: 3944117546987586333}
+  _hitTheBallState: {fileID: 5555770411208349744}
   _redTeamColor: {r: 0.9622642, g: 0.69648504, b: 0.5855287, a: 1}
   _blueTeamColor: {r: 0.67105734, g: 0.7010645, b: 0.9811321, a: 1}
+  _footCollisionNotifiers:
+  - {fileID: 2673598539980400286}
+  - {fileID: 6741327655883602863}
 --- !u!114 &8319521487852339180
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1894,6 +1911,7 @@ GameObject:
   - component: {fileID: 7493366068423778400}
   - component: {fileID: 7959058103532834469}
   - component: {fileID: 1654331558776566039}
+  - component: {fileID: 2673598539980400286}
   m_Layer: 0
   m_Name: Leg_Ankle_L
   m_TagString: Untagged
@@ -2047,6 +2065,18 @@ ConfigurableJoint:
   m_EnablePreprocessing: 1
   m_MassScale: 1
   m_ConnectedMassScale: 1
+--- !u!114 &2673598539980400286
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3706671279111760645}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 189c2594fd77464b9eb0cdeb3b0c6597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Src.Components.FootCollisionNotifierComponent
 --- !u!1 &4433698109105619229
 GameObject:
   m_ObjectHideFlags: 0
@@ -2058,6 +2088,7 @@ GameObject:
   - component: {fileID: 2998367859795598884}
   - component: {fileID: 3841676442365315264}
   - component: {fileID: 198676718294239406}
+  - component: {fileID: 6741327655883602863}
   m_Layer: 0
   m_Name: Leg_Ankle_R
   m_TagString: Untagged
@@ -2211,6 +2242,18 @@ ConfigurableJoint:
   m_EnablePreprocessing: 1
   m_MassScale: 1
   m_ConnectedMassScale: 1
+--- !u!114 &6741327655883602863
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4433698109105619229}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 189c2594fd77464b9eb0cdeb3b0c6597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Src.Components.FootCollisionNotifierComponent
 --- !u!1 &4563114019863617833
 GameObject:
   m_ObjectHideFlags: 0

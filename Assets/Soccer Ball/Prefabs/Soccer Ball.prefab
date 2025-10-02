@@ -48,6 +48,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49a424cdce8b45df8ba287d9f8757a05, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Src.Components.BallFacade
+  _rigidbody: {fileID: 1199665150887521535}
 --- !u!33 &33935909779426952
 MeshFilter:
   m_ObjectHideFlags: 0

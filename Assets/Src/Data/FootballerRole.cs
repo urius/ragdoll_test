@@ -1,6 +1,6 @@
 namespace Src.Data
 {
-    public enum FootballerBehaviourStrategy
+    public enum FootballerRole
     {
         Undefined,
         Goalkeeper,

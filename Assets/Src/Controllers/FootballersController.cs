@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using System.Linq;
 using Src.Components;
+using Src.Controllers.RolesBehaviourProcessors;
 using Src.Data;
 using Src.Factories;
 using Src.Model;
@@ -22,6 +22,9 @@ namespace Src.Controllers
         private readonly ICameraDirectionProvider _cameraDirectionProvider;
         private readonly IGoalGatesProvider _goalGatesProvider;
         private readonly IBallPositionProvider _ballPositionProvider;
+        private readonly GoalkeeperBehaviourProcessor _goalkeeperBehaviourProcessor;
+        private readonly AttackerBehaviourProcessor _attackerBehaviourProcessor;
+        private readonly DefenderBehaviourProcessor _defenderBehaviourProcessor;
 
         private int _fixedTicksCounter = 0;
 
@@ -32,7 +35,10 @@ namespace Src.Controllers
             IGameUnitsProvider unitsProvider,
             ICameraDirectionProvider cameraDirectionProvider,
             IGoalGatesProvider goalGatesProvider,
-            IBallPositionProvider ballPositionProvider)
+            IBallPositionProvider ballPositionProvider,
+            GoalkeeperBehaviourProcessor goalkeeperBehaviourProcessor,
+            AttackerBehaviourProcessor attackerBehaviourProcessor,
+            DefenderBehaviourProcessor defenderBehaviourProcessor)
         {
             _unitFactory = unitFactory;
             _startPointsProvider = startPointsProvider;
@@ -41,6 +47,9 @@ namespace Src.Controllers
             _cameraDirectionProvider = cameraDirectionProvider;
             _goalGatesProvider = goalGatesProvider;
             _ballPositionProvider = ballPositionProvider;
+            _goalkeeperBehaviourProcessor = goalkeeperBehaviourProcessor;
+            _attackerBehaviourProcessor = attackerBehaviourProcessor;
+            _defenderBehaviourProcessor = defenderBehaviourProcessor;
         }
         
         public void Start()
@@ -49,11 +58,26 @@ namespace Src.Controllers
 
             CreateFootballers();
             DefineGoalkeepers();
+            UpdateRoles();
+        }
+
+        public void FixedTick()
+        {
+            ProcessPlayerControlledUnit();
+
+            _fixedTicksCounter++;
+
+            if (_fixedTicksCounter > LogicUpdateFixedTicksCount)
+            {
+                _fixedTicksCounter = 0;
+                UpdateRoles();
+                ProcessFootballersBehaviourLogic();
+            }
         }
 
         private void DefineGoalkeepers()
         {
-            var closestToGoalGatesUnits = new Dictionary<TeamKey, IFootballerUnit>(_unitsProvider.Footballers.Count());
+            var closestToGoalGatesUnits = new Dictionary<TeamKey, IFootballerUnit>(2);
             
             foreach (var footballerUnit in _unitsProvider.Footballers)
             {
@@ -74,7 +98,38 @@ namespace Src.Controllers
 
             foreach (var kvp in closestToGoalGatesUnits)
             {
-                kvp.Value.BehaviourStrategy = FootballerBehaviourStrategy.Goalkeeper;
+                kvp.Value.Role = FootballerRole.Goalkeeper;
+            }
+        }
+
+        private void UpdateRoles()
+        {
+            var closestToBallUnits = new Dictionary<TeamKey, IFootballerUnit>(2);
+            var ballPosition = _ballPositionProvider.Position;
+            
+            foreach (var footballerUnit in _unitsProvider.Footballers)
+            {
+                if (footballerUnit.Role == FootballerRole.Goalkeeper) continue;
+
+                footballerUnit.Role = FootballerRole.Defender;
+                
+                var team = footballerUnit.Team;
+                if (closestToBallUnits.ContainsKey(team) == false)
+                {
+                    closestToBallUnits[team] = footballerUnit;
+                    continue;
+                }
+
+                if (Vector3.Distance(ballPosition, footballerUnit.Position) <
+                    Vector3.Distance(ballPosition, closestToBallUnits[team].Position))
+                {
+                    closestToBallUnits[team] = footballerUnit;
+                }
+            }
+            
+            foreach (var closestToBallUnit in closestToBallUnits.Values)
+            {
+                closestToBallUnit.Role = FootballerRole.Attacker;
             }
         }
 
@@ -102,44 +157,23 @@ namespace Src.Controllers
             return unit;
         }
 
-        public void FixedTick()
-        {
-            ProcessPlayerControlledUnit();
-
-            _fixedTicksCounter++;
-
-            if (_fixedTicksCounter > LogicUpdateFixedTicksCount)
-            {
-                _fixedTicksCounter = 0;
-                ProcessFootballersBehaviourLogic();
-            }
-        }
-
         private void ProcessFootballersBehaviourLogic()
         {
-            ProcessGoalKeepersLogic();
-        }
-
-        private void ProcessGoalKeepersLogic()
-        {
-            var ballPosition = _ballPositionProvider.Position;
-            
             foreach (var footballer in _unitsProvider.Footballers)
             {
-                if (footballer.BehaviourStrategy == FootballerBehaviourStrategy.Goalkeeper)
+                if (_playerControlledUnitProvider.TargetUnit == footballer) continue;
+                
+                switch (footballer.Role)
                 {
-                    var gates = _goalGatesProvider.GetGatesForTeam(footballer.Team);
-                    var gateBounds = gates.BoundPositions;
-                    var gateMaxXBounds = gateBounds.Max(v => v.x);
-                    var gateMinXBounds = gateBounds.Min(v => v.x);
-                    var targetGoalKeeperXPosition = Mathf.Clamp(ballPosition.x, gateMinXBounds, gateMaxXBounds);
-
-                    var targetPos = new Vector3(targetGoalKeeperXPosition, 0, gateBounds[0].z);
-                    footballer.SetMovingToTargetPointState(targetPos);
-                    if (footballer.IsOnTargetPoint())
-                    {
-                        footballer.SetTargetDirection(gates.Forward);
-                    }
+                    case FootballerRole.Goalkeeper:
+                        _goalkeeperBehaviourProcessor.Process(footballer);
+                        break;
+                    case FootballerRole.Attacker:
+                        _attackerBehaviourProcessor.Process(footballer);
+                        break;
+                    case FootballerRole.Defender:
+                        _defenderBehaviourProcessor.Process(footballer);
+                        break;
                 }
             }
         }
@@ -149,6 +183,15 @@ namespace Src.Controllers
             if (_playerControlledUnitProvider.TargetUnit == null) return;
             
             var unit = _playerControlledUnitProvider.TargetUnit;
+
+            if (Keyboard.current.spaceKey.isPressed)
+            {
+                var hitDirection = _cameraDirectionProvider.Forward * 50;
+                hitDirection.y = 7;
+                SetHittingBallState(unit, hitDirection);
+                return;
+            }
+            
             var directionVectorLocal = GetDirectionLocalVectorByKeyboard();
 
             var directionVector = _cameraDirectionProvider.Forward * directionVectorLocal.z +
@@ -162,6 +205,20 @@ namespace Src.Controllers
             else
             {
                 unit.SetStandingState();
+            }
+        }
+
+        private void SetHittingBallState(IFootballerUnit unit, Vector3 hitDirection)
+        {
+            var ballVector = _ballPositionProvider.PositionProjected - unit.PositionProjected;
+            var ballVectorAngle = Vector3.SignedAngle(unit.ForwardProjected, ballVector, Vector3.up);
+            if (ballVectorAngle > 0)
+            {
+                unit.SetHittingBallStateRightLeg(hitDirection);
+            }
+            else
+            {
+                unit.SetHittingBallStateLeftLeg(hitDirection);
             }
         }
 
