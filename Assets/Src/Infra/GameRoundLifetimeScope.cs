@@ -5,7 +5,6 @@ using Src.Factories;
 using Src.Presenters;
 using Src.Providers;
 using UnityEngine;
-using UnityEngine.Serialization;
 using VContainer;
 using VContainer.Unity;
 
@@ -15,11 +14,13 @@ namespace Src.Infra
     {
         [SerializeField] private StartPointsProvider _startPointsProvider;
         [SerializeField] private PrefabsProvider _prefabsProvider;
-        [FormerlySerializedAs("_cameraPresenter")] [SerializeField] private CameraContainerPresenter _cameraContainerPresenter;
+        [SerializeField] private CameraContainerPresenter _cameraContainerPresenter;
         [SerializeField] private BallFacade _ballFacade;
         
         protected override void Configure(IContainerBuilder builder)
         {
+            Application.targetFrameRate = 50;
+            
             builder.RegisterInstance<IStartPointsProvider>(_startPointsProvider);
             builder.RegisterInstance<IPrefabsProvider>(_prefabsProvider);
             builder.RegisterInstance(_cameraContainerPresenter).AsImplementedInterfaces();

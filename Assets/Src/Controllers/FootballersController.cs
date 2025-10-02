@@ -11,7 +11,7 @@ using VContainer.Unity;
 
 namespace Src.Controllers
 {
-    public class FootballersController : IStartable, IFixedTickable
+    public class FootballersController : IStartable, IFixedTickable, ITickable
     {
         private const int LogicUpdateFixedTicksCount = 15;
         
@@ -63,8 +63,6 @@ namespace Src.Controllers
 
         public void FixedTick()
         {
-            ProcessPlayerControlledUnit();
-
             _fixedTicksCounter++;
 
             if (_fixedTicksCounter > LogicUpdateFixedTicksCount)
@@ -73,6 +71,11 @@ namespace Src.Controllers
                 UpdateRoles();
                 ProcessFootballersBehaviourLogic();
             }
+        }
+
+        public void Tick()
+        {
+            ProcessPlayerControlledUnit();
         }
 
         private void DefineGoalkeepers()
@@ -184,14 +187,34 @@ namespace Src.Controllers
             
             var unit = _playerControlledUnitProvider.TargetUnit;
 
+            const float deltaTime = 0.005f;
+            const float defaultFixedDeltaTime = 0.02f;
+            
             if (Keyboard.current.spaceKey.isPressed)
             {
                 var hitDirection = _cameraDirectionProvider.Forward * 50;
                 hitDirection.y = 7;
                 SetHittingBallState(unit, hitDirection);
+
+                Debug.Log("Time.fixedDeltaTime: " + Time.fixedDeltaTime);
+                
+                var newTimeScale = Mathf.Max(0.01f, Time.timeScale - deltaTime);
+                if (Time.timeScale >= 1)
+                {
+                    newTimeScale = 0.2f;
+                }
+                Time.timeScale = newTimeScale;
+                Time.fixedDeltaTime = Time.timeScale * defaultFixedDeltaTime;
+                
                 return;
             }
-            
+
+            if (Time.timeScale < 1)
+            {
+                Time.timeScale = Mathf.Min(1, Time.timeScale + deltaTime);
+                Time.fixedDeltaTime = Time.timeScale * defaultFixedDeltaTime;
+            }
+
             var directionVectorLocal = GetDirectionLocalVectorByKeyboard();
 
             var directionVector = _cameraDirectionProvider.Forward * directionVectorLocal.z +
