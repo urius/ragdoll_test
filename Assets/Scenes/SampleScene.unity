@@ -1321,6 +1321,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1379866207}
   - component: {fileID: 1379866206}
+  - component: {fileID: 1379866208}
   m_Layer: 0
   m_Name: '[ Scope ]'
   m_TagString: Untagged
@@ -1347,7 +1348,7 @@ MonoBehaviour:
   - {fileID: 1725155340}
   _startPointsProvider: {fileID: 1410123147}
   _prefabsProvider: {fileID: 11400000, guid: 7fa5b898feb9f4a4c8ec63588d911242, type: 2}
-  _cameraPresenter: {fileID: 1725155342}
+  _cameraContainerPresenter: {fileID: 1725155342}
   _ballFacade: {fileID: 1830153357}
 --- !u!4 &1379866207
 Transform:
@@ -1364,6 +1365,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1379866208
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1379866205}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64ed929deb514dcd864e560da8d569d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Src.DebugComponents.DrawGizmosComponent
 --- !u!1 &1407337809
 GameObject:
   m_ObjectHideFlags: 0

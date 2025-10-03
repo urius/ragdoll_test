@@ -1,7 +1,11 @@
 using System;
 using Src.Data;
+using Src.Data.BehaviourStates;
+using Src.Extensions;
 using Src.Model;
+using Src.Providers;
 using UnityEngine;
+using VContainer;
 
 namespace Src.Components
 {
@@ -30,6 +34,8 @@ namespace Src.Components
         private float _targetVelocity = 0;
         private float _currentVelocity = 0;
         private FootballerMoveState _nextMoveState = FootballerMoveState.Standing;
+        private IBallPositionProvider _ballPositionProvider;
+        private Vector3 _targetMoveToOffset;
 
         public FootballerRole Role { get; set; }
         public Vector3 TargetMoveToPoint { get; private set; }
@@ -41,6 +47,7 @@ namespace Src.Components
                 return result;
             }
         }
+        public BehaviourStateName BehaviourState { get; private set; }
         public FootballerMoveState MoveState { get; private set; }
         public TeamKey Team => _unitData.Team;
         public Vector3 Position => transform.position;
@@ -95,6 +102,14 @@ namespace Src.Components
 
                 ProcessMoveFinishedIfNeeded();
             }
+
+            ProcessBehaviourState();
+        }
+
+        [Inject]
+        public void Construct(IBallPositionProvider ballPositionProvider)
+        {
+            _ballPositionProvider = ballPositionProvider;
         }
 
         public void SetupData(TeamKey team, int teamInnerIndex)
@@ -102,6 +117,52 @@ namespace Src.Components
             _unitData.Team = team;
             SetupColorFromTeam();
             _unitData.TeamInnerIndex = teamInnerIndex;
+        }
+
+        public void SetInterceptBallState(Vector3 offset)
+        {
+            _targetMoveToOffset = offset;
+            if (BehaviourState == BehaviourStateName.InterceptingBall) return;
+            
+            BehaviourState = BehaviourStateName.InterceptingBall;
+            ProcessBehaviourState();
+        }
+
+        public void ResetBehaviourState()
+        {
+            BehaviourState = BehaviourStateName.Undefined;
+        }
+
+        public void SetPlayerControlledBehaviourState()
+        {
+            if (BehaviourState == BehaviourStateName.PlayerControlled) return;
+            
+            BehaviourState = BehaviourStateName.PlayerControlled;
+            SetStandingState();
+        }
+
+        public void SetLeadTheBallState()
+        {
+            _targetMoveToOffset = Vector3.zero;
+            if (BehaviourState == BehaviourStateName.LeadTheBall) return;
+
+            BehaviourState = BehaviourStateName.LeadTheBall;
+            ProcessBehaviourState();
+        }
+
+        private void ProcessBehaviourState()
+        {
+            switch (BehaviourState)
+            {
+                case BehaviourStateName.Undefined:
+                    SetStandingState();
+                    break;
+                case BehaviourStateName.InterceptingBall:
+                case BehaviourStateName.LeadTheBall:
+                    SetTargetMoveToPoint((_ballPositionProvider.Position + _targetMoveToOffset).Projected());
+                    SetMovingState();
+                    break;
+            }
         }
 
         public void SetTargetDirection(Vector3 directionVector)

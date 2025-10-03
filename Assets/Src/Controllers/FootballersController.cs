@@ -54,8 +54,6 @@ namespace Src.Controllers
         
         public void Start()
         {
-            Debug.Log("FootballersPresenter.Start");
-
             CreateFootballers();
             DefineGoalkeepers();
             UpdateRoles();
@@ -164,7 +162,11 @@ namespace Src.Controllers
         {
             foreach (var footballer in _unitsProvider.Footballers)
             {
-                if (_playerControlledUnitProvider.TargetUnit == footballer) continue;
+                if (_playerControlledUnitProvider.TargetUnit == footballer)
+                {
+                    _playerControlledUnitProvider.TargetUnit.SetPlayerControlledBehaviourState();
+                    continue;
+                }
                 
                 switch (footballer.Role)
                 {
@@ -196,8 +198,6 @@ namespace Src.Controllers
                 hitDirection.y = 7;
                 SetHittingBallState(unit, hitDirection);
 
-                Debug.Log("Time.fixedDeltaTime: " + Time.fixedDeltaTime);
-                
                 var newTimeScale = Mathf.Max(0.01f, Time.timeScale - deltaTime);
                 if (Time.timeScale >= 1)
                 {

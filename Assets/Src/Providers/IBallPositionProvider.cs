@@ -1,10 +1,6 @@
-using UnityEngine;
-
 namespace Src.Providers
 {
-    public interface IBallPositionProvider
+    public interface IBallPositionProvider : IDynamicPositionProvider
     {
-        Vector3 Position { get; }
-        Vector3 PositionProjected { get; }
     }
 }
