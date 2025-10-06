@@ -20,6 +20,8 @@ namespace Src.Components
         [SerializeField] private Color _redTeamColor;
         [SerializeField] private Color _blueTeamColor;
         [SerializeField] private FootCollisionNotifierComponent[] _footCollisionNotifiers;
+
+        public event Action<IFootballerUnit> MovedToTargetPoint;
         
         private const float DeltaVelocity = 0.2f;
 
@@ -72,8 +74,8 @@ namespace Src.Components
                 return result;
             }
         }
-
         private Vector3 _requestedHitDirection;
+        private float _maxSpeed = 15f;
 
         private void Awake()
         {
@@ -95,9 +97,12 @@ namespace Src.Components
                 if (angle < 35)
                 {
                     IncreaseVelocityIfNeeded();
+
+                    var linearVelocityY = _mainRigidbody.linearVelocity.y;
+                    var linearVelocity = _currentVelocity > 0 ? ProjectedForward * _currentVelocity : Vector3.zero;
+                    linearVelocity.y = linearVelocityY < 0 ? linearVelocityY : 0.5f * linearVelocityY;
                     
-                    _mainRigidbody.linearVelocity =
-                        _currentVelocity > 0 ? ProjectedForward * _currentVelocity : Vector3.zero;
+                    _mainRigidbody.linearVelocity = linearVelocity;
                 }
 
                 ProcessMoveFinishedIfNeeded();
@@ -117,6 +122,14 @@ namespace Src.Components
             _unitData.Team = team;
             SetupColorFromTeam();
             _unitData.TeamInnerIndex = teamInnerIndex;
+        }
+
+        public void ChangeRole(FootballerRole role)
+        {
+            if (Role == role) return;
+
+            if (BehaviourState != BehaviourStateName.PlayerControlled) ResetBehaviourState();
+            Role = role;
         }
 
         public void SetInterceptBallState(Vector3 offset)
@@ -170,20 +183,15 @@ namespace Src.Components
             _lookToBehaviour.SetTargetLookVector(directionVector);
         }
 
-        public void SetMovingToTargetPointState(Vector3 targetPoint)
+        public void SetMoveToTargetPointState(Vector3 targetPoint)
         {
+            BehaviourState = BehaviourStateName.MoveToPoint;
+            
             SetTargetMoveToPoint(targetPoint);
             
             if (IsOnTargetPoint()) return;
             
             SetMovingState();
-        }
-
-        public void SetTargetMoveToPoint(Vector3 targetPoint)
-        {
-            TargetMoveToPoint = targetPoint;
-            
-            _lookToBehaviour.SetTargetLookFromPosition(TargetMoveToPoint);
         }
 
         public void SetMovingState()
@@ -196,19 +204,35 @@ namespace Src.Components
             SetState(FootballerMoveState.Standing);
         }
 
-        public void SetHittingBallStateRightLeg(Vector3 hitDirection)
+        public void SetHittingBallState(Vector3 hitDirection)
         {
-            _requestedHitDirection = hitDirection;
-            SetState(FootballerMoveState.HittingTheBallRight);
+            var ballVector = _ballPositionProvider.PositionProjected - PositionProjected;
+            var ballVectorAngle = Vector3.SignedAngle(ForwardProjected, ballVector, Vector3.up);
+            if (ballVectorAngle > 0)
+            {
+                SetHittingBallStateRightLeg(hitDirection);
+            }
+            else
+            {
+                SetHittingBallStateLeftLeg(hitDirection);
+            }
         }
 
-        public void SetHittingBallStateLeftLeg(Vector3 hitDirection)
+        public void SetMaxSpeed(int maxSpeed)
         {
-            _requestedHitDirection = hitDirection;
-            SetState(FootballerMoveState.HittingTheBallLeft);
+            _maxSpeed = maxSpeed;
+            if (MoveState == FootballerMoveState.Moving)
+            {
+                _targetVelocity = _maxSpeed;
+            }
         }
 
-        public void SetState(FootballerMoveState moveState, bool force = false)
+        public bool IsOnTargetPoint()
+        {
+            return GetFlatDistance(TargetMoveToPoint, transform.position) < 1f;
+        }
+
+        private void SetState(FootballerMoveState moveState, bool force = false)
         {
             if (MoveState == moveState) return;
 
@@ -227,7 +251,7 @@ namespace Src.Components
                     _velocityDamping.SetHorizontalDampingFactor(1);
                     _hitTheBallState.ResetHitState();
                     _animator.SetInteger(MoveStateParamKey, IsRunning);
-                    _targetVelocity = 15f;
+                    _targetVelocity = _maxSpeed;
                     break;
                 case FootballerMoveState.Standing:
                     _velocityDamping.SetHorizontalDampingFactor(_defaultHorizontalDampingFactor);
@@ -250,9 +274,11 @@ namespace Src.Components
             }
         }
 
-        public bool IsOnTargetPoint()
+        private void SetTargetMoveToPoint(Vector3 targetPoint)
         {
-            return GetFlatDistance(TargetMoveToPoint, transform.position) < 1f;
+            TargetMoveToPoint = targetPoint;
+            
+            _lookToBehaviour.SetTargetLookFromPosition(TargetMoveToPoint);
         }
 
         private void Subscribe()
@@ -262,6 +288,18 @@ namespace Src.Components
             {
                 footCollisionNotifier.BallCollisionEnter += OnBallCollisionEnter;
             }
+        }
+
+        private void SetHittingBallStateRightLeg(Vector3 hitDirection)
+        {
+            _requestedHitDirection = hitDirection;
+            SetState(FootballerMoveState.HittingTheBallRight);
+        }
+
+        private void SetHittingBallStateLeftLeg(Vector3 hitDirection)
+        {
+            _requestedHitDirection = hitDirection;
+            SetState(FootballerMoveState.HittingTheBallLeft);
         }
 
         private void OnBallCollisionEnter(BallFacade ballFacade)
@@ -284,6 +322,8 @@ namespace Src.Components
                 && IsOnTargetPoint())
             {
                 SetState(FootballerMoveState.Standing);
+                
+                MovedToTargetPoint?.Invoke(this);
             }
         }
 

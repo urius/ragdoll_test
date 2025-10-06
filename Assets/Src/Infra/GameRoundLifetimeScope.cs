@@ -16,6 +16,7 @@ namespace Src.Infra
         [SerializeField] private PrefabsProvider _prefabsProvider;
         [SerializeField] private CameraContainerPresenter _cameraContainerPresenter;
         [SerializeField] private BallFacade _ballFacade;
+        [SerializeField] private Transform _fieldCornerTransform;
         
         protected override void Configure(IContainerBuilder builder)
         {
@@ -25,6 +26,7 @@ namespace Src.Infra
             builder.RegisterInstance<IPrefabsProvider>(_prefabsProvider);
             builder.RegisterInstance(_cameraContainerPresenter).AsImplementedInterfaces();
             builder.RegisterInstance(_ballFacade).AsImplementedInterfaces();
+            builder.RegisterInstance(new FieldBorderPositionProvider(_fieldCornerTransform)).AsImplementedInterfaces();
             
             builder.Register<GameUnitsProvider>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<FootballerUnitFactory>(Lifetime.Singleton).AsImplementedInterfaces();
@@ -32,6 +34,7 @@ namespace Src.Infra
             builder.Register<GoalkeeperBehaviourProcessor>(Lifetime.Singleton);
             builder.Register<AttackerBehaviourProcessor>(Lifetime.Singleton);
             builder.Register<DefenderBehaviourProcessor>(Lifetime.Singleton);
+            builder.Register<UndefinedRoleBehaviourProcessor>(Lifetime.Singleton);
 
             builder.RegisterEntryPoint<GoalGatesProvider>();
             builder.RegisterEntryPoint<GameController>();

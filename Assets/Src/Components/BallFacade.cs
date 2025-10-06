@@ -27,10 +27,12 @@ namespace Src.Components
                 return result;
             }
         }
+        public Vector3 LinearVelocity => _rigidbody.linearVelocity;
 
         public void SetLinearVelocity(Vector3 velocity)
         {
             _rigidbody.linearVelocity = velocity;
         }
+
     }
 }

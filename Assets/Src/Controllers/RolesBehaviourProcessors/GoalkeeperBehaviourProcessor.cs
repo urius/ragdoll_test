@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Src.Controllers.RolesBehaviourProcessors
 {
-    public class GoalkeeperBehaviourProcessor
+    public class GoalkeeperBehaviourProcessor : IRoleBehaviourProcessor
     {
         private readonly IBallPositionProvider _ballPositionProvider;
         private readonly IGoalGatesProvider _goalGatesProvider;
@@ -29,8 +29,11 @@ namespace Src.Controllers.RolesBehaviourProcessors
             var targetGoalKeeperXPosition = Mathf.Clamp(ballPosition.x, gateMinXBounds, gateMaxXBounds);
 
             var targetPos = new Vector3(targetGoalKeeperXPosition, 0, gateBounds[0].z);
-            footballer.SetMovingToTargetPointState(targetPos);
-            if (footballer.IsOnTargetPoint())
+            if (Vector3.Distance(footballer.PositionProjected, targetPos) > 1)
+            {
+                footballer.SetMoveToTargetPointState(targetPos);
+            }
+            else
             {
                 footballer.SetTargetDirection(gates.Forward);
             }

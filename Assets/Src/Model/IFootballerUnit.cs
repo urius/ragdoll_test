@@ -1,3 +1,4 @@
+using System;
 using Src.Data;
 using Src.Data.BehaviourStates;
 using Src.Providers;
@@ -7,26 +8,28 @@ namespace Src.Model
 {
     public interface IFootballerUnit : IDynamicPositionProvider
     {
-        FootballerRole Role { get; set; }
+        event Action<IFootballerUnit> MovedToTargetPoint;
+        
+        FootballerRole Role { get; }
         TeamKey Team { get; }
-        Vector3 ForwardProjected { get; }
-        FootballerMoveState MoveState { get; }
-        bool IsHittingTheBallAnimationPlaying { get; }
         BehaviourStateName BehaviourState { get; }
+        Vector3 TargetMoveToPoint { get; }
 
         void SetupData(TeamKey team, int teamInnerIndex);
+        
+        void ChangeRole(FootballerRole role);
 
         void SetInterceptBallState(Vector3 offset);
         void SetLeadTheBallState();
+        void SetMoveToTargetPointState(Vector3 targetPoint);
         void ResetBehaviourState();
         void SetPlayerControlledBehaviourState();
         bool IsOnTargetPoint();
 
         void SetTargetDirection(Vector3 directionVector);
         void SetMovingState();
-        void SetMovingToTargetPointState(Vector3 targetPoint);
         void SetStandingState();
-        void SetHittingBallStateRightLeg(Vector3 hitDirection);
-        void SetHittingBallStateLeftLeg(Vector3 hitDirection);
+        void SetHittingBallState(Vector3 hitDirection);
+        void SetMaxSpeed(int maxSpeed);
     }
 }

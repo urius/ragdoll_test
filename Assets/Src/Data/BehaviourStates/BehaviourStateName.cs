@@ -6,5 +6,6 @@ namespace Src.Data.BehaviourStates
         PlayerControlled,
         InterceptingBall,
         LeadTheBall,
+        MoveToPoint,
     }
 }
