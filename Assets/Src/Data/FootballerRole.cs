@@ -6,5 +6,6 @@ namespace Src.Data
         Goalkeeper,
         Defender,
         Attacker,
+        AttackerSupport,
     }
 }

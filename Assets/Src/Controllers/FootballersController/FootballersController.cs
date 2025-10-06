@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Src.Components;
 using Src.Controllers.RolesBehaviourProcessors;
 using Src.Data;
@@ -10,7 +9,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using VContainer.Unity;
 
-namespace Src.Controllers
+namespace Src.Controllers.FootballersController
 {
     public class FootballersController : IStartable, IFixedTickable, ITickable
     {
@@ -21,12 +20,12 @@ namespace Src.Controllers
         private readonly PlayerControlledUnitProvider _playerControlledUnitProvider;
         private readonly IGameUnitsProvider _unitsProvider;
         private readonly ICameraDirectionProvider _cameraDirectionProvider;
-        private readonly IGoalGatesProvider _goalGatesProvider;
-        private readonly IBallPositionProvider _ballPositionProvider;
         private readonly GoalkeeperBehaviourProcessor _goalkeeperBehaviourProcessor;
         private readonly AttackerBehaviourProcessor _attackerBehaviourProcessor;
+        private readonly AttackerSupportBehaviourProcessor _attackerSupportBehaviourProcessor;
         private readonly DefenderBehaviourProcessor _defenderBehaviourProcessor;
         private readonly UndefinedRoleBehaviourProcessor _undefinedRoleBehaviour;
+        private readonly DefineRolesLogic _defineRolesLogic;
 
         private int _fixedTicksCounter = 0;
 
@@ -36,32 +35,32 @@ namespace Src.Controllers
             PlayerControlledUnitProvider playerControlledUnitProvider,
             IGameUnitsProvider unitsProvider,
             ICameraDirectionProvider cameraDirectionProvider,
-            IGoalGatesProvider goalGatesProvider,
-            IBallPositionProvider ballPositionProvider,
             GoalkeeperBehaviourProcessor goalkeeperBehaviourProcessor,
             AttackerBehaviourProcessor attackerBehaviourProcessor,
+            AttackerSupportBehaviourProcessor attackerSupportBehaviourProcessor,
             DefenderBehaviourProcessor defenderBehaviourProcessor,
-            UndefinedRoleBehaviourProcessor undefinedRoleBehaviour)
+            UndefinedRoleBehaviourProcessor undefinedRoleBehaviour,
+            DefineRolesLogic defineRolesLogic)
         {
             _unitFactory = unitFactory;
             _startPointsProvider = startPointsProvider;
             _playerControlledUnitProvider = playerControlledUnitProvider;
             _unitsProvider = unitsProvider;
             _cameraDirectionProvider = cameraDirectionProvider;
-            _goalGatesProvider = goalGatesProvider;
-            _ballPositionProvider = ballPositionProvider;
             _goalkeeperBehaviourProcessor = goalkeeperBehaviourProcessor;
             _attackerBehaviourProcessor = attackerBehaviourProcessor;
+            _attackerSupportBehaviourProcessor = attackerSupportBehaviourProcessor;
             _defenderBehaviourProcessor = defenderBehaviourProcessor;
             _undefinedRoleBehaviour = undefinedRoleBehaviour;
+            _defineRolesLogic = defineRolesLogic;
         }
         
         public void Start()
         {
             CreateFootballers();
             
-            DefineGoalkeepers();
-            UpdateRoles();
+            _defineRolesLogic.DefineGoalkeepers();
+            _defineRolesLogic.UpdateRoles();
         }
 
         public void FixedTick()
@@ -71,7 +70,8 @@ namespace Src.Controllers
             if (_fixedTicksCounter > LogicUpdateFixedTicksCount)
             {
                 _fixedTicksCounter = 0;
-                UpdateRoles();
+                
+                _defineRolesLogic.UpdateRoles();
                 ProcessFootballersBehaviourLogic();
             }
         }
@@ -79,70 +79,6 @@ namespace Src.Controllers
         public void Tick()
         {
             ProcessPlayerControlledUnit();
-        }
-
-        private void DefineGoalkeepers()
-        {
-            var closestToGoalGatesUnits = new Dictionary<TeamKey, IFootballerUnit>(2);
-            
-            foreach (var footballerUnit in _unitsProvider.Footballers)
-            {
-                var team = footballerUnit.Team;
-                if (closestToGoalGatesUnits.ContainsKey(team) == false)
-                {
-                    closestToGoalGatesUnits[team] = footballerUnit;
-                    continue;
-                }
-
-                var goalGatesPosition = _goalGatesProvider.GetGatesForTeam(team).Position;
-                if (Vector3.Distance(goalGatesPosition, footballerUnit.Position) <
-                    Vector3.Distance(goalGatesPosition, closestToGoalGatesUnits[team].Position))
-                {
-                    closestToGoalGatesUnits[team] = footballerUnit;
-                }
-            }
-
-            foreach (var kvp in closestToGoalGatesUnits)
-            {
-                kvp.Value.ChangeRole(FootballerRole.Goalkeeper);
-            }
-        }
-
-        private void UpdateRoles()
-        {
-            var closestToBallUnits = new Dictionary<TeamKey, IFootballerUnit>(2);
-            var ballPosition = _ballPositionProvider.Position;
-            
-            foreach (var footballerUnit in _unitsProvider.Footballers)
-            {
-                if (footballerUnit.Role == FootballerRole.Goalkeeper) continue;
-
-                var team = footballerUnit.Team;
-                if (closestToBallUnits.ContainsKey(team) == false)
-                {
-                    closestToBallUnits[team] = footballerUnit;
-                    continue;
-                }
-
-                if (Vector3.Distance(ballPosition, footballerUnit.Position) <
-                    Vector3.Distance(ballPosition, closestToBallUnits[team].Position))
-                {
-                    closestToBallUnits[team] = footballerUnit;
-                }
-            }
-            
-            foreach (var closestToBallUnit in closestToBallUnits.Values)
-            {
-                closestToBallUnit.ChangeRole(FootballerRole.Attacker);
-            }
-
-            foreach (var footballerUnit in _unitsProvider.Footballers)
-            {
-                if (footballerUnit.Role == FootballerRole.Goalkeeper) continue;
-                if(closestToBallUnits[footballerUnit.Team] == footballerUnit) continue;
-                
-                footballerUnit.ChangeRole(FootballerRole.Defender);
-            }
         }
 
         private void CreateFootballers()
@@ -191,6 +127,8 @@ namespace Src.Controllers
                     return _goalkeeperBehaviourProcessor;
                 case FootballerRole.Attacker:
                     return _attackerBehaviourProcessor;
+                case FootballerRole.AttackerSupport:
+                    return _attackerSupportBehaviourProcessor;
                 case FootballerRole.Defender:
                     return _defenderBehaviourProcessor;
                 case FootballerRole.Undefined:

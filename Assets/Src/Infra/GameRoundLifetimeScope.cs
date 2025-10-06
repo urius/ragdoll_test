@@ -1,5 +1,6 @@
 using Src.Components;
 using Src.Controllers;
+using Src.Controllers.FootballersController;
 using Src.Controllers.RolesBehaviourProcessors;
 using Src.Factories;
 using Src.Presenters;
@@ -33,8 +34,10 @@ namespace Src.Infra
             builder.Register<PlayerControlledUnitProvider>(Lifetime.Singleton);
             builder.Register<GoalkeeperBehaviourProcessor>(Lifetime.Singleton);
             builder.Register<AttackerBehaviourProcessor>(Lifetime.Singleton);
+            builder.Register<AttackerSupportBehaviourProcessor>(Lifetime.Singleton);
             builder.Register<DefenderBehaviourProcessor>(Lifetime.Singleton);
             builder.Register<UndefinedRoleBehaviourProcessor>(Lifetime.Singleton);
+            builder.Register<DefineRolesLogic>(Lifetime.Singleton);
 
             builder.RegisterEntryPoint<GoalGatesProvider>();
             builder.RegisterEntryPoint<GameController>();
