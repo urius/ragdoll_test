@@ -100,7 +100,7 @@ namespace Src.Components
 
                     var linearVelocityY = _mainRigidbody.linearVelocity.y;
                     var linearVelocity = _currentVelocity > 0 ? ProjectedForward * _currentVelocity : Vector3.zero;
-                    linearVelocity.y = linearVelocityY < 0 ? linearVelocityY : 0.5f * linearVelocityY;
+                    linearVelocity.y = linearVelocityY < 0 ? linearVelocityY : 0.2f * linearVelocityY;
                     
                     _mainRigidbody.linearVelocity = linearVelocity;
                 }

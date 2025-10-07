@@ -99,7 +99,7 @@ namespace Src.Controllers.RolesBehaviourProcessors
                 ? _fieldBorderPositionProvider.GetLeftQuarterX()
                 : _fieldBorderPositionProvider.GetRightQuarterX();
             supportPositionSide.x = x;
-            supportPositionSide = _fieldBorderPositionProvider.ClampByBorder(supportPositionSide, 10);
+            supportPositionSide = _fieldBorderPositionProvider.ClampByBorder(supportPositionSide, 20);
             return supportPositionSide;
         }
 
@@ -107,7 +107,7 @@ namespace Src.Controllers.RolesBehaviourProcessors
         {
             var supportPositionMiddle = attackerPosition + forward * 20;
             supportPositionMiddle.x = 0;
-            supportPositionMiddle = _fieldBorderPositionProvider.ClampByBorder(supportPositionMiddle, 15);
+            supportPositionMiddle = _fieldBorderPositionProvider.ClampByBorder(supportPositionMiddle, 30);
             return supportPositionMiddle;
         }
 
