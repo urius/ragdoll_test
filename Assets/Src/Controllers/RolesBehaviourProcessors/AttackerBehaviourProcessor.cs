@@ -69,9 +69,8 @@ namespace Src.Controllers.RolesBehaviourProcessors
         {
             Debug.Log("HitBallTo");
 
-            var direction = (targetPosition - footballer.PositionProjected).normalized * 50;
-            direction.y = 7;
-            footballer.SetHittingBallState(direction);
+            var direction = targetPosition - footballer.PositionProjected;
+            footballer.SetHittingBallState(direction, 50, 7);
         }
 
         private bool IsBallNear(IFootballerUnit footballer)

@@ -149,9 +149,7 @@ namespace Src.Controllers.FootballersController
             
             if (Keyboard.current.spaceKey.isPressed)
             {
-                var hitDirection = _cameraDirectionProvider.Forward * 50;
-                hitDirection.y = 7;
-                unit.SetHittingBallState(hitDirection);
+                unit.SetHittingBallState(_cameraDirectionProvider.Forward, 50, 7);
 
                 var newTimeScale = Mathf.Max(0.01f, Time.timeScale - deltaTime);
                 if (Time.timeScale >= 1)

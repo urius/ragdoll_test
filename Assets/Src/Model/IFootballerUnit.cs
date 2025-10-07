@@ -29,7 +29,7 @@ namespace Src.Model
         void SetTargetDirection(Vector3 directionVector);
         void SetMovingState();
         void SetStandingState();
-        void SetHittingBallState(Vector3 hitDirection);
+        void SetHittingBallState(Vector3 hitDirection, float strengthHorizontal = 50, float strengthVertical = 5);
         void SetMaxSpeed(int maxSpeed);
     }
 }

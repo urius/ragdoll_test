@@ -204,17 +204,21 @@ namespace Src.Components
             SetState(FootballerMoveState.Standing);
         }
 
-        public void SetHittingBallState(Vector3 hitDirection)
+        public void SetHittingBallState(Vector3 hitDirection, float strengthHorizontal = 50, float strengthVertical = 5)
         {
             var ballVector = _ballPositionProvider.PositionProjected - PositionProjected;
             var ballVectorAngle = Vector3.SignedAngle(ForwardProjected, ballVector, Vector3.up);
+
+            var hitVector = hitDirection.normalized * strengthHorizontal;
+            hitVector.y = strengthVertical;
+            
             if (ballVectorAngle > 0)
             {
-                SetHittingBallStateRightLeg(hitDirection);
+                SetHittingBallStateRightLeg(hitVector);
             }
             else
             {
-                SetHittingBallStateLeftLeg(hitDirection);
+                SetHittingBallStateLeftLeg(hitVector);
             }
         }
 
