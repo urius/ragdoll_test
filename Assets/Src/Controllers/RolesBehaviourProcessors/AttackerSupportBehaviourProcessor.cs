@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Src.Data;
 using Src.Data.BehaviourStates;
@@ -13,6 +14,8 @@ namespace Src.Controllers.RolesBehaviourProcessors
         private readonly IGoalGatesProvider _goalGatesProvider;
         private readonly IFieldBorderPositionProvider _fieldBorderPositionProvider;
 
+        private readonly List<IFootballerUnit> _attackerSupportUnitsList = new(3);
+
         public AttackerSupportBehaviourProcessor(
             IGameUnitsProvider unitsProvider,
             IGoalGatesProvider goalGatesProvider,
@@ -25,6 +28,8 @@ namespace Src.Controllers.RolesBehaviourProcessors
 
         public void Process(IFootballerUnit footballer)
         {
+            UpdateAttackersList(footballer);
+            
             switch (footballer.BehaviourState)
             {
                 case BehaviourStateName.Undefined:
@@ -35,11 +40,36 @@ namespace Src.Controllers.RolesBehaviourProcessors
                     {
                         footballer.ResetBehaviourState();
                     }
-                    else if(Random.value < 0.1f)
+                    else if (Random.value < 0.1f)
                     {
                         UpdateMoveToSupportPointState(footballer);
                     }
+
                     break;
+            }
+        }
+
+        private void UpdateAttackersList(IFootballerUnit footballer)
+        {
+            var shouldInsert = true;
+            
+            for (var i = 0; i < _attackerSupportUnitsList.Count; i++)
+            {
+                var tempFootballer = _attackerSupportUnitsList[i];
+                if (tempFootballer == footballer)
+                {
+                    shouldInsert = false;
+                }
+                else if (_attackerSupportUnitsList[i].Role != FootballerRole.AttackerSupport)
+                {
+                    _attackerSupportUnitsList.Remove(tempFootballer);
+                    i--;
+                }
+            }
+
+            if (shouldInsert)
+            {
+                _attackerSupportUnitsList.Add(footballer);
             }
         }
 
@@ -54,18 +84,49 @@ namespace Src.Controllers.RolesBehaviourProcessors
                 var forward = _goalGatesProvider.GetGatesForTeam(footballer.Team).Forward;
                 var attackerPosition = activeAttacker.PositionProjected;
 
-                var supportPosition = attackerPosition + forward * 50;
-
-                var x = attackerPosition.x > 0
-                    ? _fieldBorderPositionProvider.GetLeftQuarterX()
-                    : _fieldBorderPositionProvider.GetRightQuarterX();
-
-                supportPosition.x = x;
-
-                supportPosition = _fieldBorderPositionProvider.ClampByBorder(supportPosition, 10);
-
-                footballer.SetMoveToTargetPointState(supportPosition);
+                var targetPosition = IndexOfTeamUnit(footballer) == 0
+                    ? GetSupportPositionSide(attackerPosition, forward)
+                    : GetSupportPositionMiddle(attackerPosition, forward);
+                
+                footballer.SetMoveToTargetPointState(targetPosition);
             }
+        }
+
+        private Vector3 GetSupportPositionSide(Vector3 attackerPosition, Vector3 forward)
+        {
+            var supportPositionSide = attackerPosition + forward * 50;
+            var x = attackerPosition.x > 0
+                ? _fieldBorderPositionProvider.GetLeftQuarterX()
+                : _fieldBorderPositionProvider.GetRightQuarterX();
+            supportPositionSide.x = x;
+            supportPositionSide = _fieldBorderPositionProvider.ClampByBorder(supportPositionSide, 10);
+            return supportPositionSide;
+        }
+
+        private Vector3 GetSupportPositionMiddle(Vector3 attackerPosition, Vector3 forward)
+        {
+            var supportPositionMiddle = attackerPosition + forward * 20;
+            supportPositionMiddle.x = 0;
+            supportPositionMiddle = _fieldBorderPositionProvider.ClampByBorder(supportPositionMiddle, 15);
+            return supportPositionMiddle;
+        }
+
+        private int IndexOfTeamUnit(IFootballerUnit footballer)
+        {
+            var index = -1;
+            foreach (var unit in _attackerSupportUnitsList)
+            {
+                if (unit.Team == footballer.Team)
+                {
+                    index++;
+                    if (unit == footballer)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            return index;
         }
     }
 }

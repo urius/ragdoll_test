@@ -62,11 +62,15 @@ namespace Src.Controllers.FootballersController
             SetRole(closestToBallUnitDataRed, FootballerRole.Attacker);
             var closestToBallUnitDataBlue = GetMinDistanceForNotDefinedRoleUnit(ballPosition, TeamKey.Blue);
             SetRole(closestToBallUnitDataBlue, FootballerRole.Attacker);
-            
-            var secondaryClosestToBallUnitDataRed = GetMinDistanceForNotDefinedRoleUnit(ballPosition, TeamKey.Red);
-            SetRole(secondaryClosestToBallUnitDataRed, FootballerRole.AttackerSupport);
-            var secondaryClosestToBallUnitDataBlue = GetMinDistanceForNotDefinedRoleUnit(ballPosition, TeamKey.Blue);
-            SetRole(secondaryClosestToBallUnitDataBlue, FootballerRole.AttackerSupport);
+
+            const int amountOfAttackerSupportUnits = 2;
+            for (var i = 0; i < amountOfAttackerSupportUnits; i++)
+            {
+                var secondaryClosestToBallUnitDataRed = GetMinDistanceForNotDefinedRoleUnit(ballPosition, TeamKey.Red);
+                SetRole(secondaryClosestToBallUnitDataRed, FootballerRole.AttackerSupport);
+                var secondaryClosestToBallUnitDataBlue = GetMinDistanceForNotDefinedRoleUnit(ballPosition, TeamKey.Blue);
+                SetRole(secondaryClosestToBallUnitDataBlue, FootballerRole.AttackerSupport);
+            }
             
             foreach (var unitData in _unitOperationalDataByTeam[TeamKey.Red])
             {
