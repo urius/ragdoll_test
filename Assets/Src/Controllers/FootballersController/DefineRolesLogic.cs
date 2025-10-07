@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Src.Data;
+using Src.Extensions;
 using Src.Model;
 using Src.Providers;
 using UnityEngine;
@@ -55,7 +56,7 @@ namespace Src.Controllers.FootballersController
 
         public void UpdateRoles()
         {
-            var ballPosition = _ballPositionProvider.Position;
+            var ballPosition = _ballPositionProvider.PositionProjected + _ballPositionProvider.LinearVelocity.Projected();
             
             ResetRoleFlagsAndUpdateUnitDistances();
             var closestToBallUnitDataRed = GetMinDistanceForNotDefinedRoleUnit(ballPosition, TeamKey.Red);
