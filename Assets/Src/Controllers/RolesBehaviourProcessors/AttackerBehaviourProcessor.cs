@@ -35,16 +35,19 @@ namespace Src.Controllers.RolesBehaviourProcessors
                     DefineState(footballer);
                     break;
                 case BehaviourStateName.InterceptingBall:
-                    if (footballer.IsOnTargetPoint() || 
-                        (_borderPositionProvider.IsCloseToShortBorder(footballer.PositionProjected) 
-                         && CheckBallIsAhead(footballer)))
-                    {
-                        UpdateLeadTheBallState(footballer);
-                    }
-                    else
                     {
                         UpdateBallInterceptionState(footballer);
+
+                        if (footballer.IsOnTargetPoint() ||
+                            CheckBallIsAhead(footballer, 3) ||
+                            (_borderPositionProvider.IsCloseToShortBorder(footballer.PositionProjected)
+                             && CheckBallIsAhead(footballer)))
+                        {
+                            Debug.Log("<color=green>Set Lead the ball</color>");
+                            UpdateLeadTheBallState(footballer);
+                        }
                     }
+
                     break;
                 case BehaviourStateName.LeadTheBall:
                     ProcessLeadTheBallState(footballer);
@@ -271,9 +274,9 @@ namespace Src.Controllers.RolesBehaviourProcessors
             }
         }
 
-        private bool CheckBallIsAhead(IFootballerUnit footballer)
+        private bool CheckBallIsAhead(IFootballerUnit footballer, float relativeOffset = 0)
         {
-            return CheckPositionIsAhead(footballer, _ballPositionProvider.Position);
+            return CheckPositionIsAhead(footballer, _ballPositionProvider.Position, relativeOffset);
         }
         
         private bool CheckPositionIsAhead(IFootballerUnit footballer, Vector3 targetPosition, float relativeOffset = 0)
@@ -288,8 +291,8 @@ namespace Src.Controllers.RolesBehaviourProcessors
         private Vector3 GetInterceptionOffset(int teamSign)
         {
             var ballPosition = _ballPositionProvider.Position;
-            var xOffset = (ballPosition.x < 0 ? 1 : -1) * 3;
-            var zOffset = teamSign * 3;
+            var xOffset = (ballPosition.x < 0 ? 1 : -1) * 5;
+            var zOffset = teamSign * 5;
             var offset = new Vector3(xOffset, 0, zOffset);
             var linearVelocityOffset = _ballPositionProvider.LinearVelocity * 0.2f;
             offset += linearVelocityOffset;
