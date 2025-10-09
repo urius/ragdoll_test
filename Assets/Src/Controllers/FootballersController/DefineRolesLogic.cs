@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Src.Data;
+using Src.DebugComponents;
 using Src.Extensions;
 using Src.Model;
 using Src.Providers;
@@ -56,20 +57,20 @@ namespace Src.Controllers.FootballersController
 
         public void UpdateRoles()
         {
-            var ballPosition = _ballPositionProvider.PositionProjected + _ballPositionProvider.LinearVelocity.Projected();
+            var ballPositionWithAdvance = _ballPositionProvider.PositionProjected + 0.5f * _ballPositionProvider.LinearVelocity.Projected();
             
             ResetRoleFlagsAndUpdateUnitDistances();
-            var closestToBallUnitDataRed = GetMinDistanceForNotDefinedRoleUnit(ballPosition, TeamKey.Red);
+            var closestToBallUnitDataRed = GetMinDistanceForNotDefinedRoleUnit(ballPositionWithAdvance, TeamKey.Red);
             SetRole(closestToBallUnitDataRed, FootballerRole.Attacker);
-            var closestToBallUnitDataBlue = GetMinDistanceForNotDefinedRoleUnit(ballPosition, TeamKey.Blue);
+            var closestToBallUnitDataBlue = GetMinDistanceForNotDefinedRoleUnit(ballPositionWithAdvance, TeamKey.Blue);
             SetRole(closestToBallUnitDataBlue, FootballerRole.Attacker);
 
             const int amountOfAttackerSupportUnits = 2;
             for (var i = 0; i < amountOfAttackerSupportUnits; i++)
             {
-                var secondaryClosestToBallUnitDataRed = GetMinDistanceForNotDefinedRoleUnit(ballPosition, TeamKey.Red);
+                var secondaryClosestToBallUnitDataRed = GetMinDistanceForNotDefinedRoleUnit(ballPositionWithAdvance, TeamKey.Red);
                 SetRole(secondaryClosestToBallUnitDataRed, FootballerRole.AttackerSupport);
-                var secondaryClosestToBallUnitDataBlue = GetMinDistanceForNotDefinedRoleUnit(ballPosition, TeamKey.Blue);
+                var secondaryClosestToBallUnitDataBlue = GetMinDistanceForNotDefinedRoleUnit(ballPositionWithAdvance, TeamKey.Blue);
                 SetRole(secondaryClosestToBallUnitDataBlue, FootballerRole.AttackerSupport);
             }
             

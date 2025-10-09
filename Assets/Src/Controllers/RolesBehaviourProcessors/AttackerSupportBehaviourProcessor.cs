@@ -28,7 +28,7 @@ namespace Src.Controllers.RolesBehaviourProcessors
 
         public void Process(IFootballerUnit footballer)
         {
-            UpdateAttackersList(footballer);
+            UpdateAttackSupportersList(footballer);
             
             switch (footballer.BehaviourState)
             {
@@ -49,7 +49,7 @@ namespace Src.Controllers.RolesBehaviourProcessors
             }
         }
 
-        private void UpdateAttackersList(IFootballerUnit footballer)
+        private void UpdateAttackSupportersList(IFootballerUnit footballer)
         {
             var shouldInsert = true;
             
