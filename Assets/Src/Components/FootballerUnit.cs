@@ -78,6 +78,7 @@ namespace Src.Components
         private Vector3 _requestedHitDirection;
         private float _maxSpeed = 20f;
         private Vector3 _requestedBallSpeedCorrectDirection;
+        private float _startHitBallTime;
 
         private void Awake()
         {
@@ -111,6 +112,7 @@ namespace Src.Components
             }
 
             ProcessBehaviourState();
+            ProcessHitBallFix();
         }
 
         [Inject]
@@ -275,10 +277,12 @@ namespace Src.Components
                     _targetVelocity = 0f;
                     break;
                 case FootballerMoveState.HittingTheBallRight:
+                    _startHitBallTime = Time.time;
                     _animator.SetInteger(MoveStateParamKey, IsHittingTheBallRight);
                     _targetVelocity = 0f;
                     break;
                 case FootballerMoveState.HittingTheBallLeft:
+                    _startHitBallTime = Time.time;
                     _animator.SetInteger(MoveStateParamKey, IsHittingTheBallLeft);
                     _targetVelocity = 0f;
                     break;
@@ -315,6 +319,17 @@ namespace Src.Components
         {
             _requestedHitDirection = hitDirection;
             SetState(FootballerMoveState.HittingTheBallLeft);
+        }
+
+        private void ProcessHitBallFix()
+        {
+            if (MoveState is FootballerMoveState.HittingTheBallLeft or FootballerMoveState.HittingTheBallRight 
+                && Time.time - _startHitBallTime > 5)
+            {
+                Debug.Log("<color=red>ProcessHitBallFix</color>");
+                
+                OnHitTheBallAnimationEnded(); //call lost method 
+            }
         }
 
         private void OnBallCollisionEnter(BallModelFacade ballModelFacade)
