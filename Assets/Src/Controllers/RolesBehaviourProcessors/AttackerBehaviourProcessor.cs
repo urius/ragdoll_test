@@ -1,3 +1,4 @@
+using System;
 using Src.Data;
 using Src.Data.BehaviourStates;
 using Src.DebugComponents;
@@ -5,6 +6,7 @@ using Src.Extensions;
 using Src.Model;
 using Src.Providers;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Src.Controllers.RolesBehaviourProcessors
 {
@@ -36,15 +38,21 @@ namespace Src.Controllers.RolesBehaviourProcessors
                     break;
                 case BehaviourStateName.InterceptingBall:
                     {
+                        if (ProcessHitBallWhileIntercepting(footballer))
+                        {
+                            break;
+                        }
+
                         UpdateBallInterceptionState(footballer);
 
-                        if (footballer.IsOnTargetPoint() ||
+                        if (footballer.TargetPointWasReached ||
                             CheckBallIsAhead(footballer, 3) ||
-                            (_borderPositionProvider.IsCloseToShortBorder(footballer.PositionProjected)
-                             && CheckBallIsAhead(footballer)))
+                            (_borderPositionProvider.IsCloseToShortBorder(footballer.PositionProjected) && CheckBallIsAhead(footballer)))
                         {
                             Debug.Log("<color=green>Set Lead the ball</color>");
                             UpdateLeadTheBallState(footballer);
+                            
+                            return;
                         }
                     }
 
@@ -225,12 +233,12 @@ namespace Src.Controllers.RolesBehaviourProcessors
             return Vector3.Distance(footballer.PositionProjected, _ballPositionProvider.PositionProjected);
         }
 
-        private void HitBallTo(IFootballerUnit footballer, Vector3 targetPosition)
+        private void HitBallTo(IFootballerUnit footballer, Vector3 targetPosition, float strengthHorizontal = 50, float strengthVertical = 7)
         {
             Debug.Log("HitBallTo");
 
             var direction = targetPosition - footballer.PositionProjected;
-            footballer.SetHittingBallState(direction, 50, 7);
+            footballer.SetHittingBallState(direction, strengthHorizontal, strengthVertical);
         }
 
         private bool IsBallNear(IFootballerUnit footballer)
@@ -263,15 +271,36 @@ namespace Src.Controllers.RolesBehaviourProcessors
 
         private void UpdateBallInterceptionState(IFootballerUnit footballer)
         {
-            var teamSign = GetTeamSign(footballer);
-            var offset = GetInterceptionOffset(teamSign);
+            var offset = GetInterceptionOffset(footballer);
             footballer.SetInterceptBallState(offset);
+        }
 
-            if (footballer.Team == TeamKey.Blue)
+        private bool ProcessHitBallWhileIntercepting(IFootballerUnit footballer)
+        {
+            if (IsBallNear(footballer) 
+                && _ballPositionProvider.LinearVelocity.z.Sign() == (_ballPositionProvider.Position.z - footballer.Position.z).Sign())
             {
-                DrawGizmosComponent.RequestDraw("UpdateInterceptionState", GizmoType.Sphere,
-                    _ballPositionProvider.PositionProjected + offset);
+                var directionsAngle = Vector3.Angle(
+                    _ballPositionProvider.PositionProjected - footballer.PositionProjected,
+                    footballer.TargetMoveToPoint.Projected() - footballer.PositionProjected);
+
+                Debug.Log("<color=yellow>footballerToBallVectorAngle</color>: " + directionsAngle);
+                
+                if (Mathf.Abs(directionsAngle) < 15)
+                {
+                    var directionVector = _borderPositionProvider.IsCloseToLongBorder(footballer.PositionProjected)
+                        ? new Vector3(-footballer.PositionProjected.x, 0, 0)
+                        : new Vector3(footballer.PositionProjected.x, 0, 0);
+
+                    HitBallTo(footballer, directionVector, 20);
+
+                    Debug.Log("<color=yellow>Hit while intercepting</color>: " + directionVector);
+                    
+                    return true;
+                }
             }
+
+            return false;
         }
 
         private bool CheckBallIsAhead(IFootballerUnit footballer, float relativeOffset = 0)
@@ -288,24 +317,34 @@ namespace Src.Controllers.RolesBehaviourProcessors
             return positionIsAhead;
         }
 
-        private Vector3 GetInterceptionOffset(int teamSign)
+        private Vector3 GetInterceptionOffset(IFootballerUnit footballer)
         {
-            var ballPosition = _ballPositionProvider.Position;
-            var xOffset = (ballPosition.x < 0 ? 1 : -1) * 5;
-            var zOffset = teamSign * 5;
+            var teamSign = GetTeamSign(footballer);
+            var ballPosition = _ballPositionProvider.Position.Projected();
+            var ballLinearVelocity = _ballPositionProvider.LinearVelocity;
+            
+            if (ballLinearVelocity.z.Sign() == (footballer.Position.z - ballPosition.z).Sign())
+            {
+                return ballLinearVelocity * 0.5f;
+            }
+            
+            var xOffset = (-ballPosition.x.Sign()) * 5f;
+            var zOffset = teamSign * 5f;
+            if (ballLinearVelocity.z.Sign() == teamSign)
+            {
+                zOffset += ballLinearVelocity.z * 0.5f;
+            }
+            
             var offset = new Vector3(xOffset, 0, zOffset);
-            var linearVelocityOffset = _ballPositionProvider.LinearVelocity * 0.2f;
-            offset += linearVelocityOffset;
+
+            DrawGizmosComponent.RequestDraw("Offset1", GizmoType.Sphere, ballPosition + offset);
 
             return offset;
         }
 
         private int GetTeamSign(IFootballerUnit footballer)
         {
-            var gatesPosition = _goalGatesProvider.GetGatesForTeam(footballer.Team).Position;
-            var teamSign = gatesPosition.z > 0 ? 1 : -1;
-            
-            return teamSign;
+            return _goalGatesProvider.GetGatesForTeam(footballer.Team).Position.z.Sign();
         }
     }
 }

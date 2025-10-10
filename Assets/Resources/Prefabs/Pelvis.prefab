@@ -380,7 +380,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1362735029370749373}
   serializedVersion: 5
-  m_Mass: 8
+  m_Mass: 12
   m_LinearDamping: 0.2
   m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -487,7 +487,7 @@ ConfigurableJoint:
   m_SlerpDrive:
     serializedVersion: 4
     positionSpring: 5000
-    positionDamper: 600
+    positionDamper: 800
     maximumForce: 3.4028233e+38
     useAcceleration: 0
   m_ProjectionMode: 0

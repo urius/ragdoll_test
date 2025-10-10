@@ -14,12 +14,13 @@ namespace Src.Model
         TeamKey Team { get; }
         BehaviourStateName BehaviourState { get; }
         Vector3 TargetMoveToPoint { get; }
+        public bool TargetPointWasReached { get; }
 
         void SetupData(TeamKey team, int teamInnerIndex);
         
         void ChangeRole(FootballerRole role);
 
-        void SetInterceptBallState(Vector3 offset);
+        void SetInterceptBallState(Vector3 offset, int phaseIndex = 0);
         void SetLeadTheBallState();
         void SetMoveToTargetPointState(Vector3 targetPoint);
         void ResetBehaviourState();

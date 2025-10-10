@@ -1,9 +1,9 @@
-using Src.Providers;
+using Src.Model;
 using UnityEngine;
 
 namespace Src.Components
 {
-    public class BallFacade : MonoBehaviour, IBallPositionProvider
+    public class BallModelFacade : MonoBehaviour, IBallModel
     {
         [SerializeField] private Rigidbody _rigidbody;
         
@@ -34,5 +34,9 @@ namespace Src.Components
             _rigidbody.linearVelocity = velocity;
         }
 
+        public void SetPosition(Vector3 position)
+        {
+            _rigidbody.position = position;
+        }
     }
 }

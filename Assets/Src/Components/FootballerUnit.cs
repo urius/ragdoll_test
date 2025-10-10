@@ -41,6 +41,7 @@ namespace Src.Components
 
         public FootballerRole Role { get; set; }
         public Vector3 TargetMoveToPoint { get; private set; }
+        public bool TargetPointWasReached { get; private set; }
         public Vector3 ForwardProjected {
             get
             {
@@ -75,7 +76,7 @@ namespace Src.Components
             }
         }
         private Vector3 _requestedHitDirection;
-        private float _maxSpeed = 15f;
+        private float _maxSpeed = 20f;
 
         private void Awake()
         {
@@ -132,7 +133,7 @@ namespace Src.Components
             Role = role;
         }
 
-        public void SetInterceptBallState(Vector3 offset)
+        public void SetInterceptBallState(Vector3 offset, int phaseIndex = 0)
         {
             _targetMoveToOffset = offset;
             if (BehaviourState == BehaviourStateName.InterceptingBall) return;
@@ -188,8 +189,11 @@ namespace Src.Components
             BehaviourState = BehaviourStateName.MoveToPoint;
             
             SetTargetMoveToPoint(targetPoint);
+
+            var isOnTargetPoint = IsOnTargetPoint();
+            TargetPointWasReached = isOnTargetPoint;
             
-            if (IsOnTargetPoint()) return;
+            if (isOnTargetPoint) return;
             
             SetMovingState();
         }
@@ -233,7 +237,7 @@ namespace Src.Components
 
         public bool IsOnTargetPoint()
         {
-            return GetFlatDistance(TargetMoveToPoint, transform.position) < 1f;
+            return GetFlatDistance(TargetMoveToPoint, transform.position) < 2f;
         }
 
         private void SetState(FootballerMoveState moveState, bool force = false)
@@ -306,11 +310,11 @@ namespace Src.Components
             SetState(FootballerMoveState.HittingTheBallLeft);
         }
 
-        private void OnBallCollisionEnter(BallFacade ballFacade)
+        private void OnBallCollisionEnter(BallModelFacade ballModelFacade)
         {
             if (_hitTheBallState.IsHitting)
             {
-                ballFacade.SetLinearVelocity(_requestedHitDirection);
+                ballModelFacade.SetLinearVelocity(_requestedHitDirection);
             }
         }
 
@@ -326,7 +330,8 @@ namespace Src.Components
                 && IsOnTargetPoint())
             {
                 SetState(FootballerMoveState.Standing);
-                
+
+                TargetPointWasReached = true;
                 MovedToTargetPoint?.Invoke(this);
             }
         }

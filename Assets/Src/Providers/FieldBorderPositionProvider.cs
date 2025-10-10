@@ -53,6 +53,12 @@ namespace Src.Providers
                    || coords.z > _zBorders[1] - CloseDistance;
         }
 
+        public bool IsCloseToLongBorder(Vector3 coords)
+        {
+            return coords.x < _xBorders[0] + CloseDistance
+                   || coords.x > _xBorders[1] - CloseDistance;
+        }
+
         public bool IsNearAnyBorder(Vector3 coords)
         {
             return IsNearLongBorder(coords) || IsNearShortBorder(coords);

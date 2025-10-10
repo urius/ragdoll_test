@@ -13,7 +13,7 @@ namespace Src.Controllers.FootballersController
 {
     public class FootballersController : IStartable, IFixedTickable, ITickable
     {
-        private const int LogicUpdateFixedTicksCount = 15;
+        private const int LogicUpdateFixedTicksCount = 5;
         
         private readonly IFootballerUnitFactory _unitFactory;
         private readonly IStartPointsProvider _startPointsProvider;
@@ -170,11 +170,11 @@ namespace Src.Controllers.FootballersController
 
             if (Keyboard.current.leftShiftKey.isPressed)
             {
-                _playerControlledUnitProvider.TargetUnit.SetMaxSpeed(25);
+                _playerControlledUnitProvider.TargetUnit.SetMaxSpeed(30);
             }
             else
             {
-                _playerControlledUnitProvider.TargetUnit.SetMaxSpeed(15);
+                _playerControlledUnitProvider.TargetUnit.SetMaxSpeed(20);
             }
 
             var directionVectorLocal = GetDirectionLocalVectorByKeyboard();

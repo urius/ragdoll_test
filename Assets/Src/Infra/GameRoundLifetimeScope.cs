@@ -6,6 +6,7 @@ using Src.Factories;
 using Src.Presenters;
 using Src.Providers;
 using UnityEngine;
+using UnityEngine.Serialization;
 using VContainer;
 using VContainer.Unity;
 
@@ -16,7 +17,7 @@ namespace Src.Infra
         [SerializeField] private StartPointsProvider _startPointsProvider;
         [SerializeField] private PrefabsProvider _prefabsProvider;
         [SerializeField] private CameraContainerPresenter _cameraContainerPresenter;
-        [SerializeField] private BallFacade _ballFacade;
+        [FormerlySerializedAs("_ballFacade")] [SerializeField] private BallModelFacade _ballModelFacade;
         [SerializeField] private Transform _fieldCornerTransform;
         
         protected override void Configure(IContainerBuilder builder)
@@ -26,7 +27,7 @@ namespace Src.Infra
             builder.RegisterInstance<IStartPointsProvider>(_startPointsProvider);
             builder.RegisterInstance<IPrefabsProvider>(_prefabsProvider);
             builder.RegisterInstance(_cameraContainerPresenter).AsImplementedInterfaces();
-            builder.RegisterInstance(_ballFacade).AsImplementedInterfaces();
+            builder.RegisterInstance(_ballModelFacade).AsImplementedInterfaces();
             builder.RegisterInstance(new FieldBorderPositionProvider(_fieldCornerTransform)).AsImplementedInterfaces();
             
             builder.Register<GameUnitsProvider>(Lifetime.Singleton).AsImplementedInterfaces();
@@ -42,6 +43,7 @@ namespace Src.Infra
             builder.RegisterEntryPoint<GoalGatesProvider>();
             builder.RegisterEntryPoint<GameController>();
             builder.RegisterEntryPoint<FootballersController>();
+            builder.RegisterEntryPoint<BallPositionController>();
         }
     }
 }
