@@ -29,6 +29,11 @@ namespace Src.Components
         }
         public Vector3 LinearVelocity => _rigidbody.linearVelocity;
 
+        public void AddLinearVelocity(Vector3 deltaVelocity)
+        {
+            _rigidbody.linearVelocity += deltaVelocity;
+        }
+        
         public void SetLinearVelocity(Vector3 velocity)
         {
             _rigidbody.linearVelocity = velocity;

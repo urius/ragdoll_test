@@ -1,4 +1,3 @@
-using System;
 using Src.Data;
 using Src.Data.BehaviourStates;
 using Src.DebugComponents;
@@ -37,23 +36,18 @@ namespace Src.Controllers.RolesBehaviourProcessors
                     DefineState(footballer);
                     break;
                 case BehaviourStateName.InterceptingBall:
+                    ProcessCorrectBallWhileIntercepting(footballer);
+
+                    UpdateBallInterceptionState(footballer);
+
+                    if (footballer.TargetPointWasReached
+                        || CheckBallIsAhead(footballer,
+                            Mathf.Max(3, GetTeamSign(footballer) * _ballPositionProvider.LinearVelocity.z))
+                        || (_borderPositionProvider.IsCloseToShortBorder(footballer.PositionProjected) &&
+                            CheckBallIsAhead(footballer)))
                     {
-                        if (ProcessHitBallWhileIntercepting(footballer))
-                        {
-                            break;
-                        }
-
-                        UpdateBallInterceptionState(footballer);
-
-                        if (footballer.TargetPointWasReached ||
-                            CheckBallIsAhead(footballer, 3) ||
-                            (_borderPositionProvider.IsCloseToShortBorder(footballer.PositionProjected) && CheckBallIsAhead(footballer)))
-                        {
-                            Debug.Log("<color=green>Set Lead the ball</color>");
-                            UpdateLeadTheBallState(footballer);
-                            
-                            return;
-                        }
+                        //Debug.Log("<color=green>Set Lead the ball</color>");
+                        UpdateLeadTheBallState(footballer);
                     }
 
                     break;
@@ -83,12 +77,21 @@ namespace Src.Controllers.RolesBehaviourProcessors
                 }
 
                 if (ProcessHitGatesByDistanceLogic(footballer)) return;
-                
+
                 if (_borderPositionProvider.IsNearAnyBorder(footballer.Position))
                 {
                     HitGates(footballer);
-                    
+
                     return;
+                }
+            }
+
+            if (_ballPositionProvider.Position.z.Sign() != GetTeamSign(footballer))
+            {
+                if (_ballPositionProvider.LinearVelocity.x.Sign() == _ballPositionProvider.Position.x.Sign()
+                    && Mathf.Abs(_ballPositionProvider.PositionProjected.x) > 70)
+                {
+                    footballer.RequestCorrectBallSpeed(new Vector3(-1.5f * _ballPositionProvider.LinearVelocity.x, 0, 0));
                 }
             }
         }
@@ -275,32 +278,10 @@ namespace Src.Controllers.RolesBehaviourProcessors
             footballer.SetInterceptBallState(offset);
         }
 
-        private bool ProcessHitBallWhileIntercepting(IFootballerUnit footballer)
+        private void ProcessCorrectBallWhileIntercepting(IFootballerUnit footballer)
         {
-            if (IsBallNear(footballer) 
-                && _ballPositionProvider.LinearVelocity.z.Sign() == (_ballPositionProvider.Position.z - footballer.Position.z).Sign())
-            {
-                var directionsAngle = Vector3.Angle(
-                    _ballPositionProvider.PositionProjected - footballer.PositionProjected,
-                    footballer.TargetMoveToPoint.Projected() - footballer.PositionProjected);
-
-                Debug.Log("<color=yellow>footballerToBallVectorAngle</color>: " + directionsAngle);
-                
-                if (Mathf.Abs(directionsAngle) < 15)
-                {
-                    var directionVector = _borderPositionProvider.IsCloseToLongBorder(footballer.PositionProjected)
-                        ? new Vector3(-footballer.PositionProjected.x, 0, 0)
-                        : new Vector3(footballer.PositionProjected.x, 0, 0);
-
-                    HitBallTo(footballer, directionVector, 20);
-
-                    Debug.Log("<color=yellow>Hit while intercepting</color>: " + directionVector);
-                    
-                    return true;
-                }
-            }
-
-            return false;
+            var correctedSpeed = new Vector3(_ballPositionProvider.LinearVelocity.x, 0, -_ballPositionProvider.LinearVelocity.z);
+            footballer.RequestCorrectBallSpeed(correctedSpeed);
         }
 
         private bool CheckBallIsAhead(IFootballerUnit footballer, float relativeOffset = 0)

@@ -77,6 +77,7 @@ namespace Src.Components
         }
         private Vector3 _requestedHitDirection;
         private float _maxSpeed = 20f;
+        private Vector3 _requestedBallSpeedCorrectDirection;
 
         private void Awake()
         {
@@ -160,6 +161,7 @@ namespace Src.Components
             _targetMoveToOffset = Vector3.zero;
             if (BehaviourState == BehaviourStateName.LeadTheBall) return;
 
+            _requestedBallSpeedCorrectDirection = Vector3.zero;
             BehaviourState = BehaviourStateName.LeadTheBall;
             ProcessBehaviourState();
         }
@@ -233,6 +235,11 @@ namespace Src.Components
             {
                 _targetVelocity = _maxSpeed;
             }
+        }
+
+        public void RequestCorrectBallSpeed(Vector3 ballSpeedCorrectDirection)
+        {
+            _requestedBallSpeedCorrectDirection = ballSpeedCorrectDirection;
         }
 
         public bool IsOnTargetPoint()
@@ -315,7 +322,16 @@ namespace Src.Components
             if (_hitTheBallState.IsHitting)
             {
                 ballModelFacade.SetLinearVelocity(_requestedHitDirection);
+                _requestedHitDirection = Vector3.zero;
             }
+            else if(_requestedBallSpeedCorrectDirection != Vector3.zero)
+            {
+                Debug.Log("<color=blue>Ball speed Corrected</color>");
+                
+                ballModelFacade.AddLinearVelocity(_requestedBallSpeedCorrectDirection);
+            }
+            
+            _requestedBallSpeedCorrectDirection = Vector3.zero;
         }
 
         private void OnHitTheBallAnimationEnded()

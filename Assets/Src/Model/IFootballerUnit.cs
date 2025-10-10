@@ -32,5 +32,6 @@ namespace Src.Model
         void SetStandingState();
         void SetHittingBallState(Vector3 hitDirection, float strengthHorizontal = 50, float strengthVertical = 5);
         void SetMaxSpeed(int maxSpeed);
+        void RequestCorrectBallSpeed(Vector3 vector3);
     }
 }
