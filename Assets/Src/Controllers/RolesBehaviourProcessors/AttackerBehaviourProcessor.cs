@@ -280,8 +280,18 @@ namespace Src.Controllers.RolesBehaviourProcessors
 
         private void ProcessCorrectBallWhileIntercepting(IFootballerUnit footballer)
         {
-            var correctedSpeed = new Vector3(_ballPositionProvider.LinearVelocity.x, 0, -_ballPositionProvider.LinearVelocity.z);
-            footballer.RequestCorrectBallSpeed(correctedSpeed);
+            var ballCorrectionVector = _ballPositionProvider.LinearVelocity.Projected().normalized * 25;
+            var leftCorrectionVector = Quaternion.Euler(0, -90, 0) * ballCorrectionVector;
+            var rightCorrectionVector = Quaternion.Euler(0, 90, 0) * ballCorrectionVector;
+
+            var enemyGatesPosition = _goalGatesProvider.GetGatesForTeam(footballer.Team.OppositeTeam()).Position;
+            var ballPosition = _ballPositionProvider.PositionProjected;
+
+            footballer.RequestCorrectBallSpeed(
+                (ballPosition + leftCorrectionVector - enemyGatesPosition).sqrMagnitude <
+                (ballPosition + rightCorrectionVector - enemyGatesPosition).sqrMagnitude
+                    ? leftCorrectionVector
+                    : rightCorrectionVector);
         }
 
         private bool CheckBallIsAhead(IFootballerUnit footballer, float relativeOffset = 0)
@@ -300,6 +310,8 @@ namespace Src.Controllers.RolesBehaviourProcessors
 
         private Vector3 GetInterceptionOffset(IFootballerUnit footballer)
         {
+            return _ballPositionProvider.LinearVelocity * 0.6f;
+            
             var teamSign = GetTeamSign(footballer);
             var ballPosition = _ballPositionProvider.Position.Projected();
             var ballLinearVelocity = _ballPositionProvider.LinearVelocity;
