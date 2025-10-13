@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Src.Controllers.RolesBehaviourProcessors
 {
-    public class AttackerSupportBehaviourProcessor : IRoleBehaviourProcessor
+    public class AttackerSupportBehaviourProcessor : FootballerBehaviourProcessorBase
     {
         private readonly IGameUnitsProvider _unitsProvider;
         private readonly IGoalGatesProvider _goalGatesProvider;
@@ -18,15 +18,17 @@ namespace Src.Controllers.RolesBehaviourProcessors
 
         public AttackerSupportBehaviourProcessor(
             IGameUnitsProvider unitsProvider,
+            IBallPositionProvider ballPositionProvider,
             IGoalGatesProvider goalGatesProvider,
             IFieldBorderPositionProvider fieldBorderPositionProvider)
+            : base(unitsProvider, ballPositionProvider, goalGatesProvider)
         {
             _unitsProvider = unitsProvider;
             _goalGatesProvider = goalGatesProvider;
             _fieldBorderPositionProvider = fieldBorderPositionProvider;
         }
 
-        public void Process(IFootballerUnit footballer)
+        public override void Process(IFootballerUnit footballer)
         {
             UpdateAttackSupportersList(footballer);
             

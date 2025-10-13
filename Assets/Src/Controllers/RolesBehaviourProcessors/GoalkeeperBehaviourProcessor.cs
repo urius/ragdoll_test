@@ -6,20 +6,22 @@ using UnityEngine;
 
 namespace Src.Controllers.RolesBehaviourProcessors
 {
-    public class GoalkeeperBehaviourProcessor : IRoleBehaviourProcessor
+    public class GoalkeeperBehaviourProcessor : FootballerBehaviourProcessorBase
     {
         private readonly IBallPositionProvider _ballPositionProvider;
         private readonly IGoalGatesProvider _goalGatesProvider;
 
         public GoalkeeperBehaviourProcessor(
+            IGameUnitsProvider unitsProvider,
             IBallPositionProvider ballPositionProvider,
-            IGoalGatesProvider goalGatesProvider)
+            IGoalGatesProvider goalGatesProvider) 
+            : base(unitsProvider, ballPositionProvider, goalGatesProvider)
         {
             _ballPositionProvider = ballPositionProvider;
             _goalGatesProvider = goalGatesProvider;
         }
 
-        public void Process(IFootballerUnit footballer)
+        public override void Process(IFootballerUnit footballer)
         {
             var gates = _goalGatesProvider.GetGatesForTeam(footballer.Team);
             
@@ -28,12 +30,29 @@ namespace Src.Controllers.RolesBehaviourProcessors
                 footballer.SetHittingBallState(gates.Forward, 50, 10);
                 return;
             }
+
+            var ballToGatesDistance =
+                Vector3.Distance(_goalGatesProvider.GetGatesForTeam(footballer.Team).Position, _ballPositionProvider.Position);
             
-            var ballPosition = _ballPositionProvider.PositionProjected + 0.5f * _ballPositionProvider.LinearVelocity.Projected();
+            var ballPositionWithPrediction = _ballPositionProvider.PositionProjected + 0.5f * _ballPositionProvider.LinearVelocity.Projected();
+
+            if (ballToGatesDistance < 70)
+            {
+                var distanceToBall = (_ballPositionProvider.PositionProjected - footballer.PositionProjected).magnitude;
+                var ballToClosestEnemyDistance =
+                    (GetClosestEnemy(footballer).PositionProjected - _ballPositionProvider.PositionProjected).magnitude;
+            
+                if (ballToClosestEnemyDistance > distanceToBall)
+                {
+                    footballer.SetMoveToTargetPointState(ballPositionWithPrediction);
+                    return;
+                }
+            }
+
             var gateBounds = gates.BoundPositions;
             var gateMaxXBounds = gateBounds.Max(v => v.x);
             var gateMinXBounds = gateBounds.Min(v => v.x);
-            var targetGoalKeeperXPosition = Mathf.Clamp(ballPosition.x, gateMinXBounds, gateMaxXBounds);
+            var targetGoalKeeperXPosition = Mathf.Clamp(ballPositionWithPrediction.x, gateMinXBounds, gateMaxXBounds);
 
             var targetPos = new Vector3(targetGoalKeeperXPosition, 0, gateBounds[0].z);
             if (Vector3.Distance(footballer.PositionProjected, targetPos) > 1)

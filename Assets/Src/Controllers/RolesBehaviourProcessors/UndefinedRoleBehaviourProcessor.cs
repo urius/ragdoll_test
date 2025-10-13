@@ -1,10 +1,19 @@
 using Src.Model;
+using Src.Providers;
 
 namespace Src.Controllers.RolesBehaviourProcessors
 {
-    public class UndefinedRoleBehaviourProcessor : IRoleBehaviourProcessor
+    public class UndefinedRoleBehaviourProcessor : FootballerBehaviourProcessorBase
     {
-        public void Process(IFootballerUnit _)
+        public UndefinedRoleBehaviourProcessor(
+            IGameUnitsProvider unitsProvider,
+            IBallPositionProvider ballPositionProvider,
+            IGoalGatesProvider goalGatesProvider)
+            : base(unitsProvider, ballPositionProvider, goalGatesProvider)
+        {
+        }
+
+        public override void Process(IFootballerUnit _)
         {
         }
     }

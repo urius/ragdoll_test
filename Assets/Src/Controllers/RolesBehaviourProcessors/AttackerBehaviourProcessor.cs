@@ -1,4 +1,3 @@
-using Src.Data;
 using Src.Data.BehaviourStates;
 using Src.Extensions;
 using Src.Model;
@@ -8,7 +7,7 @@ using Random = UnityEngine.Random;
 
 namespace Src.Controllers.RolesBehaviourProcessors
 {
-    public class AttackerBehaviourProcessor : IRoleBehaviourProcessor
+    public class AttackerBehaviourProcessor : FootballerBehaviourProcessorBase
     {
         private readonly IBallPositionProvider _ballPositionProvider;
         private readonly IGoalGatesProvider _goalGatesProvider;
@@ -20,6 +19,7 @@ namespace Src.Controllers.RolesBehaviourProcessors
             IGoalGatesProvider goalGatesProvider,
             IFieldBorderPositionProvider borderPositionProvider,
             IGameUnitsProvider unitsProvider)
+            : base(unitsProvider, ballPositionProvider, goalGatesProvider)
         {
             _ballPositionProvider = ballPositionProvider;
             _goalGatesProvider = goalGatesProvider;
@@ -27,7 +27,7 @@ namespace Src.Controllers.RolesBehaviourProcessors
             _unitsProvider = unitsProvider;
         }
 
-        public void Process(IFootballerUnit footballer)
+        public override void Process(IFootballerUnit footballer)
         {
             switch (footballer.BehaviourState)
             {
@@ -172,16 +172,6 @@ namespace Src.Controllers.RolesBehaviourProcessors
                 footballer.Position.z - _goalGatesProvider.GetGatesForTeam(footballer.Team.OppositeTeam()).Position.z);
         }
 
-        private IFootballerUnit GetClosestEnemy(IFootballerUnit footballer)
-        {
-            return GetClosestUnit(footballer, footballer.Team.OppositeTeam());
-        }
-
-        private IFootballerUnit GetClosestTeammate(IFootballerUnit footballer)
-        {
-            return GetClosestUnit(footballer, footballer.Team);
-        }
-
         private IFootballerUnit GetClosestTeammateAhead(IFootballerUnit targetUnit, float relativeOffset = 0)
         {
             IFootballerUnit result = null;
@@ -191,25 +181,6 @@ namespace Src.Controllers.RolesBehaviourProcessors
                 if (unit.Team == targetUnit.Team 
                     && unit != targetUnit 
                     && CheckPositionIsAhead(targetUnit, unit.PositionProjected, relativeOffset))
-                {
-                    if (result == null 
-                        || (unit.PositionProjected - targetUnit.PositionProjected).sqrMagnitude < (result.PositionProjected - targetUnit.PositionProjected).sqrMagnitude)
-                    {
-                        result = unit;
-                    }
-                }
-            }
-
-            return result;
-        }
-
-        private IFootballerUnit GetClosestUnit(IFootballerUnit targetUnit, TeamKey team)
-        {
-            IFootballerUnit result = null;
-            
-            foreach (var unit in _unitsProvider.Footballers)
-            {
-                if (unit.Team == team && unit != targetUnit)
                 {
                     if (result == null 
                         || (unit.PositionProjected - targetUnit.PositionProjected).sqrMagnitude < (result.PositionProjected - targetUnit.PositionProjected).sqrMagnitude)
@@ -269,35 +240,6 @@ namespace Src.Controllers.RolesBehaviourProcessors
                 (ballPosition + rightCorrectionVector - enemyGatesPosition).sqrMagnitude
                     ? leftCorrectionVector
                     : rightCorrectionVector);
-        }
-
-        private bool CheckBallIsAhead(IFootballerUnit footballer, float relativeOffset = 0)
-        {
-            return CheckPositionIsAhead(footballer, _ballPositionProvider.Position, relativeOffset);
-        }
-        
-        private bool CheckPositionIsAhead(IFootballerUnit footballer, Vector3 targetPosition, float relativeOffset = 0)
-        {
-            var teamSign = GetTeamSign(footballer);
-            var unitRelativeToTargetPositionSign = (footballer.Position.z - (targetPosition.z + teamSign * relativeOffset)) > 0 ? 1 : -1;
-            var positionIsAhead = unitRelativeToTargetPositionSign == teamSign;
-
-            return positionIsAhead;
-        }
-
-        private bool BallIsOnTeamSide(TeamKey teamKey)
-        {
-            return _ballPositionProvider.Position.z.Sign() == GetTeamSign(teamKey);
-        }
-
-        private int GetTeamSign(IFootballerUnit footballer)
-        {
-            return GetTeamSign(footballer.Team);
-        }
-
-        private int GetTeamSign(TeamKey teamKey)
-        {
-            return _goalGatesProvider.GetGatesForTeam(teamKey).Position.z.Sign();
         }
     }
 }
