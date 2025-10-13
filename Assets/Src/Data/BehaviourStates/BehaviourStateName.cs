@@ -4,7 +4,6 @@ namespace Src.Data.BehaviourStates
     {
         Undefined,
         PlayerControlled,
-        InterceptingBall,
         LeadTheBall,
         MoveToPoint,
     }

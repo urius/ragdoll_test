@@ -136,15 +136,6 @@ namespace Src.Components
             Role = role;
         }
 
-        public void SetInterceptBallState(Vector3 offset, int phaseIndex = 0)
-        {
-            _targetMoveToOffset = offset;
-            if (BehaviourState == BehaviourStateName.InterceptingBall) return;
-            
-            BehaviourState = BehaviourStateName.InterceptingBall;
-            ProcessBehaviourState();
-        }
-
         public void ResetBehaviourState()
         {
             BehaviourState = BehaviourStateName.Undefined;
@@ -175,7 +166,6 @@ namespace Src.Components
                 case BehaviourStateName.Undefined:
                     SetStandingState();
                     break;
-                case BehaviourStateName.InterceptingBall:
                 case BehaviourStateName.LeadTheBall:
                     SetTargetMoveToPoint((_ballPositionProvider.Position + _targetMoveToOffset).Projected());
                     SetMovingState();

@@ -1,6 +1,5 @@
 using Src.Data;
 using Src.Data.BehaviourStates;
-using Src.DebugComponents;
 using Src.Extensions;
 using Src.Model;
 using Src.Providers;
@@ -33,23 +32,7 @@ namespace Src.Controllers.RolesBehaviourProcessors
             switch (footballer.BehaviourState)
             {
                 case BehaviourStateName.Undefined:
-                    DefineState(footballer);
-                    break;
-                case BehaviourStateName.InterceptingBall:
-                    ProcessCorrectBallWhileIntercepting(footballer);
-
-                    UpdateBallInterceptionState(footballer);
-
-                    if (footballer.TargetPointWasReached
-                        || CheckBallIsAhead(footballer,
-                            Mathf.Max(3, GetTeamSign(footballer) * _ballPositionProvider.LinearVelocity.z))
-                        || (_borderPositionProvider.IsCloseToShortBorder(footballer.PositionProjected) &&
-                            CheckBallIsAhead(footballer)))
-                    {
-                        //Debug.Log("<color=green>Set Lead the ball</color>");
-                        UpdateLeadTheBallState(footballer);
-                    }
-
+                    UpdateLeadTheBallState(footballer);
                     break;
                 case BehaviourStateName.LeadTheBall:
                     ProcessLeadTheBallState(footballer);
@@ -61,7 +44,7 @@ namespace Src.Controllers.RolesBehaviourProcessors
         {
             if (CheckBallIsAhead(footballer) == false)
             {
-                ResetAndProcessState(footballer);
+                ProcessCorrectBallWhileIntercepting(footballer);
                 return;
             }
 
@@ -69,18 +52,21 @@ namespace Src.Controllers.RolesBehaviourProcessors
 
             if (isBallNear)
             {
-                if (ProcessPassIfOpponentIsAhead(footballer)) return;
+                if (PassIfOpponentIsAhead(footballer)) return;
 
-                if (Random.value < 0.2f)
+                if (Random.value < 0.4f)
                 {
-                    if (ProcessTryPassToTeammateAhead(footballer)) return;
+                    if (TryPassToTeammateAhead(footballer)) return;
                 }
 
                 if (ProcessHitGatesByDistanceLogic(footballer)) return;
 
                 if (_borderPositionProvider.IsNearAnyBorder(footballer.Position))
                 {
-                    HitGates(footballer);
+                    if (false == TryPassToTeammateAhead(footballer))
+                    {
+                        HitGates(footballer);
+                    }
 
                     return;
                 }
@@ -96,7 +82,7 @@ namespace Src.Controllers.RolesBehaviourProcessors
             }
         }
 
-        private bool ProcessPassIfOpponentIsAhead(IFootballerUnit footballer)
+        private bool PassIfOpponentIsAhead(IFootballerUnit footballer)
         {
             var closestEnemy = GetClosestEnemy(footballer);
             if (closestEnemy != null)
@@ -106,14 +92,14 @@ namespace Src.Controllers.RolesBehaviourProcessors
                 {
                     Debug.Log("Try Pass (opponent near)");
                     
-                    return ProcessTryPassToTeammateAhead(footballer, -50);
+                    return TryPassToTeammateAhead(footballer, -50);
                 }
             }
 
             return false;
         }
 
-        private bool ProcessTryPassToTeammateAhead(IFootballerUnit footballer, float relativeOffset = 0)
+        private bool TryPassToTeammateAhead(IFootballerUnit footballer, float relativeOffset = 0)
         {
             var closestTeammateAhead = GetClosestTeammateAhead(footballer, relativeOffset);
             if (closestTeammateAhead != null)
@@ -170,15 +156,6 @@ namespace Src.Controllers.RolesBehaviourProcessors
         {
             return Mathf.Abs(
                 footballer.Position.z - _goalGatesProvider.GetGatesForTeam(footballer.Team.OppositeTeam()).Position.z);
-        }
-
-        private void PassBallToClosestTeammate(IFootballerUnit footballer)
-        {
-            var closestTeammate = GetClosestTeammate(footballer);
-            if (closestTeammate != null)
-            {
-                HitBallTo(footballer, closestTeammate.PositionProjected);
-            }
         }
 
         private IFootballerUnit GetClosestEnemy(IFootballerUnit footballer)
@@ -249,33 +226,9 @@ namespace Src.Controllers.RolesBehaviourProcessors
             return DistanceToBall(footballer) < 4;
         }
 
-        private void ResetAndProcessState(IFootballerUnit footballer)
-        {
-            footballer.ResetBehaviourState();
-            Process(footballer);
-        }
-
-        private void DefineState(IFootballerUnit footballer)
-        {
-            if (CheckBallIsAhead(footballer))
-            {
-                UpdateLeadTheBallState(footballer);
-            }
-            else
-            {
-                UpdateBallInterceptionState(footballer);
-            }
-        }
-
         private void UpdateLeadTheBallState(IFootballerUnit footballer)
         {
             footballer.SetLeadTheBallState();
-        }
-
-        private void UpdateBallInterceptionState(IFootballerUnit footballer)
-        {
-            var offset = GetInterceptionOffset(footballer);
-            footballer.SetInterceptBallState(offset);
         }
 
         private void ProcessCorrectBallWhileIntercepting(IFootballerUnit footballer)
@@ -306,33 +259,6 @@ namespace Src.Controllers.RolesBehaviourProcessors
             var positionIsAhead = unitRelativeToTargetPositionSign == teamSign;
 
             return positionIsAhead;
-        }
-
-        private Vector3 GetInterceptionOffset(IFootballerUnit footballer)
-        {
-            return _ballPositionProvider.LinearVelocity * 0.6f;
-            
-            var teamSign = GetTeamSign(footballer);
-            var ballPosition = _ballPositionProvider.Position.Projected();
-            var ballLinearVelocity = _ballPositionProvider.LinearVelocity;
-            
-            if (ballLinearVelocity.z.Sign() == (footballer.Position.z - ballPosition.z).Sign())
-            {
-                return ballLinearVelocity * 0.5f;
-            }
-            
-            var xOffset = (-ballPosition.x.Sign()) * 5f;
-            var zOffset = teamSign * 5f;
-            if (ballLinearVelocity.z.Sign() == teamSign)
-            {
-                zOffset += ballLinearVelocity.z * 0.5f;
-            }
-            
-            var offset = new Vector3(xOffset, 0, zOffset);
-
-            DrawGizmosComponent.RequestDraw("Offset1", GizmoType.Sphere, ballPosition + offset);
-
-            return offset;
         }
 
         private int GetTeamSign(IFootballerUnit footballer)

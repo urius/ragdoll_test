@@ -20,7 +20,6 @@ namespace Src.Model
         
         void ChangeRole(FootballerRole role);
 
-        void SetInterceptBallState(Vector3 offset, int phaseIndex = 0);
         void SetLeadTheBallState();
         void SetMoveToTargetPointState(Vector3 targetPoint);
         void ResetBehaviourState();
