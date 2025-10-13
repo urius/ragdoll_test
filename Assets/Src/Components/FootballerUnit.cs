@@ -149,9 +149,9 @@ namespace Src.Components
             SetStandingState();
         }
 
-        public void SetLeadTheBallState()
+        public void SetLeadTheBallState(Vector3 targetPointOffset = default)
         {
-            _targetMoveToOffset = Vector3.zero;
+            _targetMoveToOffset = targetPointOffset;
             if (BehaviourState == BehaviourStateName.LeadTheBall) return;
 
             _requestedBallSpeedCorrectDirection = Vector3.zero;

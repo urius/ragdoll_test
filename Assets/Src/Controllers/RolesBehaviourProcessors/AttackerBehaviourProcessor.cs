@@ -32,7 +32,7 @@ namespace Src.Controllers.RolesBehaviourProcessors
             switch (footballer.BehaviourState)
             {
                 case BehaviourStateName.Undefined:
-                    UpdateLeadTheBallState(footballer);
+                    footballer.SetLeadTheBallState();
                     break;
                 case BehaviourStateName.LeadTheBall:
                     ProcessLeadTheBallState(footballer);
@@ -42,6 +42,8 @@ namespace Src.Controllers.RolesBehaviourProcessors
 
         private void ProcessLeadTheBallState(IFootballerUnit footballer)
         {
+            UpdateLeadTheBallTargetPointOffset(footballer);
+            
             if (CheckBallIsAhead(footballer) == false)
             {
                 ProcessCorrectBallWhileIntercepting(footballer);
@@ -104,6 +106,7 @@ namespace Src.Controllers.RolesBehaviourProcessors
             var closestTeammateAhead = GetClosestTeammateAhead(footballer, relativeOffset);
             if (closestTeammateAhead != null)
             {
+                Debug.Log("<color=yellow>Pass to teammate</color>");
                 HitBallTo(footballer, closestTeammateAhead.PositionProjected);
 
                 return true;
@@ -226,9 +229,19 @@ namespace Src.Controllers.RolesBehaviourProcessors
             return DistanceToBall(footballer) < 4;
         }
 
-        private void UpdateLeadTheBallState(IFootballerUnit footballer)
+        private void UpdateLeadTheBallTargetPointOffset(IFootballerUnit footballer)
         {
-            footballer.SetLeadTheBallState();
+            var ballVelocityVector = _ballPositionProvider.LinearVelocity.Projected();
+            var unitToBallVector = _ballPositionProvider.PositionProjected - footballer.PositionProjected;
+
+            var unitToBallDistance = unitToBallVector.magnitude;
+            var offset = Vector3.zero;
+            if (unitToBallDistance > 5)
+            {
+                offset = ballVelocityVector.normalized * unitToBallDistance * 0.5f;
+            }
+            
+            footballer.SetLeadTheBallState(offset);
         }
 
         private void ProcessCorrectBallWhileIntercepting(IFootballerUnit footballer)

@@ -20,7 +20,7 @@ namespace Src.Model
         
         void ChangeRole(FootballerRole role);
 
-        void SetLeadTheBallState();
+        void SetLeadTheBallState(Vector3 targetPointOffset = default);
         void SetMoveToTargetPointState(Vector3 targetPoint);
         void ResetBehaviourState();
         void SetPlayerControlledBehaviourState();
