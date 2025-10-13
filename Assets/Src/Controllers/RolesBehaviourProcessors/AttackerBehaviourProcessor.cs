@@ -44,9 +44,9 @@ namespace Src.Controllers.RolesBehaviourProcessors
         {
             UpdateLeadTheBallTargetPointOffset(footballer);
             
-            if (CheckBallIsAhead(footballer) == false)
+            if (NeedCorrectBallDirection(footballer))
             {
-                ProcessCorrectBallWhileIntercepting(footballer);
+                ProcessCorrectBallDirection(footballer);
                 return;
             }
 
@@ -74,7 +74,7 @@ namespace Src.Controllers.RolesBehaviourProcessors
                 }
             }
 
-            if (_ballPositionProvider.Position.z.Sign() != GetTeamSign(footballer))
+            if (BallIsOnTeamSide(footballer.Team.OppositeTeam()))
             {
                 if (_ballPositionProvider.LinearVelocity.x.Sign() == _ballPositionProvider.Position.x.Sign()
                     && Mathf.Abs(_ballPositionProvider.PositionProjected.x) > 70)
@@ -82,6 +82,17 @@ namespace Src.Controllers.RolesBehaviourProcessors
                     footballer.RequestCorrectBallSpeed(new Vector3(-1.5f * _ballPositionProvider.LinearVelocity.x, 0, 0));
                 }
             }
+        }
+
+        private bool NeedCorrectBallDirection(IFootballerUnit footballer)
+        {
+            var gatesPosition = _goalGatesProvider.GetGatesForTeam(footballer.Team.OppositeTeam()).Position;
+            var ballPosition = _ballPositionProvider.PositionProjected;
+            var ballVelocity = _ballPositionProvider.LinearVelocity;
+
+            var gatesBallVelocityAngle = Vector3.Angle(gatesPosition - ballPosition, ballVelocity);
+
+            return gatesBallVelocityAngle > 80;
         }
 
         private bool PassIfOpponentIsAhead(IFootballerUnit footballer)
@@ -244,7 +255,7 @@ namespace Src.Controllers.RolesBehaviourProcessors
             footballer.SetLeadTheBallState(offset);
         }
 
-        private void ProcessCorrectBallWhileIntercepting(IFootballerUnit footballer)
+        private void ProcessCorrectBallDirection(IFootballerUnit footballer)
         {
             var ballCorrectionVector = _ballPositionProvider.LinearVelocity.Projected().normalized * 25;
             var leftCorrectionVector = Quaternion.Euler(0, -90, 0) * ballCorrectionVector;
@@ -274,9 +285,19 @@ namespace Src.Controllers.RolesBehaviourProcessors
             return positionIsAhead;
         }
 
+        private bool BallIsOnTeamSide(TeamKey teamKey)
+        {
+            return _ballPositionProvider.Position.z.Sign() == GetTeamSign(teamKey);
+        }
+
         private int GetTeamSign(IFootballerUnit footballer)
         {
-            return _goalGatesProvider.GetGatesForTeam(footballer.Team).Position.z.Sign();
+            return GetTeamSign(footballer.Team);
+        }
+
+        private int GetTeamSign(TeamKey teamKey)
+        {
+            return _goalGatesProvider.GetGatesForTeam(teamKey).Position.z.Sign();
         }
     }
 }
