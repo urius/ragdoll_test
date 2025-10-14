@@ -12,20 +12,20 @@ namespace Src.Controllers.RolesBehaviourProcessors
     {
         private readonly IGameUnitsProvider _unitsProvider;
         private readonly IGoalGatesProvider _goalGatesProvider;
-        private readonly IFieldBorderPositionProvider _fieldBorderPositionProvider;
+        private readonly IFieldBoundsPositionProvider _fieldBoundsPositionProvider;
 
-        private readonly List<IFootballerUnit> _attackerSupportUnitsList = new(3);
+        private readonly List<IFootballerUnit> _attackerSupportUnitsList = new(10);
 
         public AttackerSupportBehaviourProcessor(
             IGameUnitsProvider unitsProvider,
             IBallPositionProvider ballPositionProvider,
             IGoalGatesProvider goalGatesProvider,
-            IFieldBorderPositionProvider fieldBorderPositionProvider)
+            IFieldBoundsPositionProvider fieldBoundsPositionProvider)
             : base(unitsProvider, ballPositionProvider, goalGatesProvider)
         {
             _unitsProvider = unitsProvider;
             _goalGatesProvider = goalGatesProvider;
-            _fieldBorderPositionProvider = fieldBorderPositionProvider;
+            _fieldBoundsPositionProvider = fieldBoundsPositionProvider;
         }
 
         public override void Process(IFootballerUnit footballer)
@@ -98,10 +98,10 @@ namespace Src.Controllers.RolesBehaviourProcessors
         {
             var supportPositionSide = attackerPosition + forward * 50;
             var x = attackerPosition.x > 0
-                ? _fieldBorderPositionProvider.GetLeftQuarterX()
-                : _fieldBorderPositionProvider.GetRightQuarterX();
+                ? _fieldBoundsPositionProvider.GetLeftQuarterX()
+                : _fieldBoundsPositionProvider.GetRightQuarterX();
             supportPositionSide.x = x;
-            supportPositionSide = _fieldBorderPositionProvider.ClampByBorder(supportPositionSide, 20);
+            supportPositionSide = _fieldBoundsPositionProvider.ClampByBorder(supportPositionSide, 20);
             return supportPositionSide;
         }
 
@@ -109,7 +109,7 @@ namespace Src.Controllers.RolesBehaviourProcessors
         {
             var supportPositionMiddle = attackerPosition + forward * 20;
             supportPositionMiddle.x = 0;
-            supportPositionMiddle = _fieldBorderPositionProvider.ClampByBorder(supportPositionMiddle, 30);
+            supportPositionMiddle = _fieldBoundsPositionProvider.ClampByBorder(supportPositionMiddle, 30);
             return supportPositionMiddle;
         }
 

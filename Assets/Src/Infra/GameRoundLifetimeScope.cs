@@ -28,7 +28,7 @@ namespace Src.Infra
             builder.RegisterInstance<IPrefabsProvider>(_prefabsProvider);
             builder.RegisterInstance(_cameraContainerPresenter).AsImplementedInterfaces();
             builder.RegisterInstance(_ballModelFacade).AsImplementedInterfaces();
-            builder.RegisterInstance(new FieldBorderPositionProvider(_fieldCornerTransform)).AsImplementedInterfaces();
+            builder.RegisterInstance(new FieldBoundsPositionProvider(_fieldCornerTransform)).AsImplementedInterfaces();
             
             builder.Register<GameUnitsProvider>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<FootballerUnitFactory>(Lifetime.Singleton).AsImplementedInterfaces();

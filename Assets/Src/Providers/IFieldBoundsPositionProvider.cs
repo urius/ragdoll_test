@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Src.Providers
 {
-    public interface IFieldBorderPositionProvider
+    public interface IFieldBoundsPositionProvider
     {
         public Vector3 ClampByBorder(Vector3 coords, float offset = 0);
         public bool IsNearLongBorder(Vector3 coords);
@@ -13,5 +13,6 @@ namespace Src.Providers
         public bool IsNearCorner(Vector3 coords);
         public float GetLeftQuarterX();
         public float GetRightQuarterX();
+        public Vector3 NormalizedBoundsToWorldBounds(Vector3 normalizedBounds);
     }
 }

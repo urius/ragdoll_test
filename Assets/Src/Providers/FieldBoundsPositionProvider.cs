@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Src.Providers
 {
-    public class FieldBorderPositionProvider : IFieldBorderPositionProvider
+    public class FieldBoundsPositionProvider : IFieldBoundsPositionProvider
     {
         private const int NearDistance = 20;
         private const int CloseDistance = 3;
@@ -10,7 +10,7 @@ namespace Src.Providers
         private readonly float[] _xBorders;
         private readonly float[] _zBorders;
 
-        public FieldBorderPositionProvider(Transform fieldCornerTransform)
+        public FieldBoundsPositionProvider(Transform fieldCornerTransform)
         {
             var fieldCornerPosition = fieldCornerTransform.position;
             
@@ -77,6 +77,11 @@ namespace Src.Providers
         public float GetRightQuarterX()
         {
             return _xBorders[1] * 0.5f;
+        }
+
+        public Vector3 NormalizedBoundsToWorldBounds(Vector3 normalizedBounds)
+        {
+            return new Vector3(normalizedBounds.x * _xBorders[1] * 2, 0, normalizedBounds.z * _zBorders[1] * 2);
         }
     }
 }

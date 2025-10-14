@@ -83,5 +83,53 @@ namespace Src.Controllers.RolesBehaviourProcessors
 
             return result;
         }
+
+        protected bool TryPassToTeammateAhead(IFootballerUnit footballer, float relativeOffset = 0)
+        {
+            var closestTeammateAhead = GetClosestTeammateAhead(footballer, relativeOffset);
+            if (closestTeammateAhead != null)
+            {
+                Debug.Log("<color=yellow>Pass to teammate</color>");
+                HitBallTo(footballer, closestTeammateAhead.PositionProjected);
+
+                return true;
+            }
+
+            return false;
+        }
+
+        protected void HitBallTo(IFootballerUnit footballer, Vector3 targetPosition, float strengthHorizontal = 50, float strengthVertical = 7)
+        {
+            Debug.Log("HitBallTo");
+
+            var direction = targetPosition - footballer.PositionProjected;
+            footballer.SetHittingBallState(direction, strengthHorizontal, strengthVertical);
+        }
+
+        protected void HitGates(IFootballerUnit footballer)
+        {
+            HitBallTo(footballer, _goalGatesProvider.GetGatesForTeam(footballer.Team.OppositeTeam()).Position);
+        }
+
+        protected IFootballerUnit GetClosestTeammateAhead(IFootballerUnit targetUnit, float relativeOffset = 0)
+        {
+            IFootballerUnit result = null;
+            
+            foreach (var unit in _unitsProvider.Footballers)
+            {
+                if (unit.Team == targetUnit.Team 
+                    && unit != targetUnit 
+                    && CheckPositionIsAhead(targetUnit, unit.PositionProjected, relativeOffset))
+                {
+                    if (result == null 
+                        || (unit.PositionProjected - targetUnit.PositionProjected).sqrMagnitude < (result.PositionProjected - targetUnit.PositionProjected).sqrMagnitude)
+                    {
+                        result = unit;
+                    }
+                }
+            }
+
+            return result;
+        }
     }
 }

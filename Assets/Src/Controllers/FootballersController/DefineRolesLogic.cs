@@ -149,7 +149,7 @@ namespace Src.Controllers.FootballersController
         private static void UpdateDistanceAndResetFlag(FootballerData unitData, Vector3 ballPosition)
         {
             unitData.DistanceToBall = Vector3.Distance(unitData.FootballerUnit.Position, ballPosition);
-            unitData.IsUnitRoleDefined = unitData.FootballerUnit.Role == FootballerRole.Goalkeeper;
+            unitData.IsUnitRoleDefined = unitData.FootballerUnit.Role is FootballerRole.Goalkeeper or FootballerRole.Defender;
         }
 
         private class FootballerData

@@ -11,19 +11,19 @@ namespace Src.Controllers.RolesBehaviourProcessors
     {
         private readonly IBallPositionProvider _ballPositionProvider;
         private readonly IGoalGatesProvider _goalGatesProvider;
-        private readonly IFieldBorderPositionProvider _borderPositionProvider;
+        private readonly IFieldBoundsPositionProvider _boundsPositionProvider;
         private readonly IGameUnitsProvider _unitsProvider;
 
         public AttackerBehaviourProcessor(
             IBallPositionProvider ballPositionProvider,
             IGoalGatesProvider goalGatesProvider,
-            IFieldBorderPositionProvider borderPositionProvider,
+            IFieldBoundsPositionProvider boundsPositionProvider,
             IGameUnitsProvider unitsProvider)
             : base(unitsProvider, ballPositionProvider, goalGatesProvider)
         {
             _ballPositionProvider = ballPositionProvider;
             _goalGatesProvider = goalGatesProvider;
-            _borderPositionProvider = borderPositionProvider;
+            _boundsPositionProvider = boundsPositionProvider;
             _unitsProvider = unitsProvider;
         }
 
@@ -63,7 +63,7 @@ namespace Src.Controllers.RolesBehaviourProcessors
 
                 if (ProcessHitGatesByDistanceLogic(footballer)) return;
 
-                if (_borderPositionProvider.IsNearAnyBorder(footballer.Position))
+                if (_boundsPositionProvider.IsNearAnyBorder(footballer.Position))
                 {
                     if (false == TryPassToTeammateAhead(footballer))
                     {
@@ -112,20 +112,6 @@ namespace Src.Controllers.RolesBehaviourProcessors
             return false;
         }
 
-        private bool TryPassToTeammateAhead(IFootballerUnit footballer, float relativeOffset = 0)
-        {
-            var closestTeammateAhead = GetClosestTeammateAhead(footballer, relativeOffset);
-            if (closestTeammateAhead != null)
-            {
-                Debug.Log("<color=yellow>Pass to teammate</color>");
-                HitBallTo(footballer, closestTeammateAhead.PositionProjected);
-
-                return true;
-            }
-
-            return false;
-        }
-
         private bool ProcessHitGatesByDistanceLogic(IFootballerUnit footballer)
         {
             var zDistanceToEnemyGates = GetZDistanceToEnemyGates(footballer);
@@ -161,54 +147,15 @@ namespace Src.Controllers.RolesBehaviourProcessors
             return false;
         }
 
-        private void HitGates(IFootballerUnit footballer)
-        {
-            HitBallTo(footballer, _goalGatesProvider.GetGatesForTeam(footballer.Team.OppositeTeam()).Position);
-        }
-
         private float GetZDistanceToEnemyGates(IFootballerUnit footballer)
         {
             return Mathf.Abs(
                 footballer.Position.z - _goalGatesProvider.GetGatesForTeam(footballer.Team.OppositeTeam()).Position.z);
         }
 
-        private IFootballerUnit GetClosestTeammateAhead(IFootballerUnit targetUnit, float relativeOffset = 0)
-        {
-            IFootballerUnit result = null;
-            
-            foreach (var unit in _unitsProvider.Footballers)
-            {
-                if (unit.Team == targetUnit.Team 
-                    && unit != targetUnit 
-                    && CheckPositionIsAhead(targetUnit, unit.PositionProjected, relativeOffset))
-                {
-                    if (result == null 
-                        || (unit.PositionProjected - targetUnit.PositionProjected).sqrMagnitude < (result.PositionProjected - targetUnit.PositionProjected).sqrMagnitude)
-                    {
-                        result = unit;
-                    }
-                }
-            }
-
-            return result;
-        }
-
-        private float DistanceToBall(IFootballerUnit footballer)
-        {
-            return Vector3.Distance(footballer.PositionProjected, _ballPositionProvider.PositionProjected);
-        }
-
-        private void HitBallTo(IFootballerUnit footballer, Vector3 targetPosition, float strengthHorizontal = 50, float strengthVertical = 7)
-        {
-            Debug.Log("HitBallTo");
-
-            var direction = targetPosition - footballer.PositionProjected;
-            footballer.SetHittingBallState(direction, strengthHorizontal, strengthVertical);
-        }
-
         private bool IsBallNear(IFootballerUnit footballer)
         {
-            return DistanceToBall(footballer) < 4;
+            return Vector3.Distance(footballer.PositionProjected, _ballPositionProvider.PositionProjected) < 4;
         }
 
         private void UpdateLeadTheBallTargetPointOffset(IFootballerUnit footballer)
