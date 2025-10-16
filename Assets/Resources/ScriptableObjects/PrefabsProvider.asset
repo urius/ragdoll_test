@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75768f08bac842e39e90279c1ad667b8, type: 3}
   m_Name: PrefabsProvider
   m_EditorClassIdentifier: Assembly-CSharp::Src.Providers.PrefabsProvider
-  _footballerPrefab: {fileID: 4122147543006828718, guid: a5fe219e56e1d49b0b5b5a32b29da280, type: 3}
+  _footballerPrefab: {fileID: 6468486664708073637, guid: 2955db5493ab14b6ebaef75884e964c7, type: 3}

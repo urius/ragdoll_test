@@ -13,7 +13,7 @@ namespace Src.Components
         private Vector3[] _boundPositions;
         
         private TeamKey _team;
-        private AllMeshRenderers _allMeshRenderers;
+        private AllMeshRenderersColorSetter _allMeshRenderersColorSetter;
 
         public TeamKey Team => _team;
         public Vector3 Position => transform.position;
@@ -22,7 +22,7 @@ namespace Src.Components
 
         private void Awake()
         {
-            _allMeshRenderers = GetComponent<AllMeshRenderers>();
+            _allMeshRenderersColorSetter = GetComponent<AllMeshRenderersColorSetter>();
             _goalCollider.SetGoalGatesRef(this);
             
             _boundPositions = _boundTransforms.Select(t => t.position).ToArray();

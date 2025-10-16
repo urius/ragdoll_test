@@ -15,7 +15,6 @@ namespace Src.Components
         [SerializeField] private Animator _animator;
         [SerializeField] private VelocityDamping _velocityDamping;
         [SerializeField] private Rigidbody _mainRigidbody;
-        [SerializeField] private AllMeshRenderers _allMeshRenderers;
         [SerializeField] private HitTheBallState _hitTheBallState;
         [SerializeField] private Color _redTeamColor;
         [SerializeField] private Color _blueTeamColor;
@@ -31,6 +30,7 @@ namespace Src.Components
         private static readonly int IsHittingTheBallRight = 2;
         private static readonly int IsHittingTheBallLeft = 3;
 
+        private IColorSetter _colorSetter;
         private float _defaultHorizontalDampingFactor = 0.9f;
         private FootballerUnitData _unitData;
         private float _targetVelocity = 0;
@@ -83,6 +83,7 @@ namespace Src.Components
         private void Awake()
         {
             _defaultHorizontalDampingFactor = _velocityDamping.HorizontalDampingFactor;
+            _colorSetter = GetComponent<IColorSetter>();
 
             Subscribe();
         }
@@ -101,9 +102,7 @@ namespace Src.Components
                 {
                     IncreaseVelocityIfNeeded();
 
-                    var linearVelocityY = _mainRigidbody.linearVelocity.y;
                     var linearVelocity = _currentVelocity > 0 ? ProjectedForward * _currentVelocity : Vector3.zero;
-                    linearVelocity.y = linearVelocityY < 0 ? linearVelocityY : 0.2f * linearVelocityY;
                     
                     _mainRigidbody.linearVelocity = linearVelocity;
                 }
@@ -392,10 +391,10 @@ namespace Src.Components
             switch (_unitData.Team)
             {
                 case TeamKey.Red:
-                    _allMeshRenderers.SetColor(_redTeamColor);
+                    _colorSetter.SetColor(_redTeamColor);
                     break;
                 case TeamKey.Blue:
-                    _allMeshRenderers.SetColor(_blueTeamColor);
+                    _colorSetter.SetColor(_blueTeamColor);
                     break;
             }
         }

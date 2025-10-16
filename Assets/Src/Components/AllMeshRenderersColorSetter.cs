@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Src.Components
 {
-    public class AllMeshRenderers : MonoBehaviour
+    public class AllMeshRenderersColorSetter : MonoBehaviour, IColorSetter
     {
         private MeshRenderer[] _allRenderers;
 

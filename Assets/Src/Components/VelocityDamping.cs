@@ -5,12 +5,14 @@ namespace Src.Components
 {
     public class VelocityDamping : MonoBehaviour
     {
-        [SerializeField] private float _verticalDampingFactor;
+        [SerializeField] private float _verticalDampingFactorUp;
+        [SerializeField] private float _verticalDampingFactorDown;
         [SerializeField] private float _horizontalDampingFactor;
         
         private Rigidbody _rigidbody;
 
-        public float VerticalDampingFactor => _verticalDampingFactor;
+        public float VerticalDampingFactorUp => _verticalDampingFactorUp;
+        public float VerticalDampingFactorDown => _verticalDampingFactorDown;
         public float HorizontalDampingFactor => _horizontalDampingFactor;
 
         private void Awake()
@@ -21,7 +23,7 @@ namespace Src.Components
         private void FixedUpdate()
         {
             var linearVelocity = _rigidbody.linearVelocity;
-            linearVelocity.y *= _verticalDampingFactor;
+            linearVelocity.y *= linearVelocity.y > 0 ? _verticalDampingFactorUp : _verticalDampingFactorDown;
             linearVelocity.x *= _horizontalDampingFactor;
             linearVelocity.z *= _horizontalDampingFactor;
             _rigidbody.linearVelocity = linearVelocity;

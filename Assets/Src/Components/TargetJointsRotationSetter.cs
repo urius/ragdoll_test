@@ -12,10 +12,26 @@ namespace Src.Components
             for (var i = 0; i < _pairs.Length; i++)
             {
                 var transformJointPair = _pairs[i];
-                
+
                 transformJointPair.ConfigurableJoint.targetRotation =
-                    Quaternion.Inverse(transformJointPair.Transform.localRotation);
+                    Quaternion.Inverse(GetLocalRotation(transformJointPair));
             }
+        }
+
+        private static Quaternion GetLocalRotation(TransformJointPair jointPairData)
+        {
+            if (jointPairData.LocalRotationRetrieveMode == LocalRotationRetrieveMode.XtoZ)
+            {
+                var eulerOriginal = jointPairData.Transform.localRotation.eulerAngles;
+                return Quaternion.Euler(0, 0, eulerOriginal.x);
+            }
+            else if (jointPairData.LocalRotationRetrieveMode == LocalRotationRetrieveMode.XtoNegX)
+            {
+                var eulerOriginal = jointPairData.Transform.localRotation.eulerAngles;
+                return Quaternion.Euler(-eulerOriginal.x, 0, 0);
+            }
+
+            return jointPairData.Transform.localRotation;
         }
 
         [Serializable]
@@ -23,6 +39,14 @@ namespace Src.Components
         {
             public Transform Transform;
             public ConfigurableJoint ConfigurableJoint;
+            public LocalRotationRetrieveMode LocalRotationRetrieveMode;
+        }
+        
+        private enum LocalRotationRetrieveMode
+        {
+            Default,
+            XtoZ,
+            XtoNegX,
         }
     }
 
