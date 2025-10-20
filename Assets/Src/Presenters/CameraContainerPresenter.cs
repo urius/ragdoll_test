@@ -51,16 +51,31 @@ namespace Src.Presenters
             }
             else
             {
-                transform.position = Vector3.Lerp(transform.position, _targetUnit.transform.position, 5 * Time.deltaTime);
-
-                var targetRotation = _targetUnit.transform.rotation.eulerAngles;
-                targetRotation.x = targetRotation.z = 0;
-                transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(targetRotation), 3 * Time.deltaTime);
+                var targetUnitTransform = _targetUnit.transform;
+                var cameraContainerTransform = transform;
                 
-                if ((_targetUnit.transform.position - transform.position).sqrMagnitude < 0.3f 
-                    && Math.Abs(transform.rotation.eulerAngles.y - targetRotation.y) < 0.5f)
+                var moveVector = targetUnitTransform.position - cameraContainerTransform.position;
+                var sqrMagnitude = moveVector.sqrMagnitude;
+                
+                var targetRotation = targetUnitTransform.rotation.eulerAngles;
+                targetRotation.x = targetRotation.z = 0;
+                transform.rotation = Quaternion.Lerp(cameraContainerTransform.rotation, Quaternion.Euler(targetRotation), 3 * Time.deltaTime);
+                
+                if (sqrMagnitude >= 1)
                 {
-                    _targetUnitIsLocked = true;
+                    transform.position = Vector3.Lerp(transform.position, _targetUnit.transform.position, 6 * Time.deltaTime);
+                }
+                else
+                {
+                    var distance = moveVector.magnitude;
+                    var moveSpeed = 3 * Time.deltaTime;
+
+                    transform.position += moveVector.normalized * (distance < moveSpeed ? distance : moveSpeed);
+                
+                    if (sqrMagnitude < 0.05f)
+                    {
+                        _targetUnitIsLocked = true;
+                    }
                 }
             }
         }
@@ -68,6 +83,9 @@ namespace Src.Presenters
         private void RotateCameraToMouse()
         {
             var mouse = Mouse.current;
+            var mouseDeltaX = mouse.delta.x.value;
+            
+            if (Mathf.Abs(mouseDeltaX) > 100) return;
             
             var eulerRotation = transform.localRotation.eulerAngles;
             eulerRotation.y += mouse.delta.x.value * Sensitivity;
