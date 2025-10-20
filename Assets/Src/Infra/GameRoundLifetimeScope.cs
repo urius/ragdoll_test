@@ -44,6 +44,7 @@ namespace Src.Infra
             builder.RegisterEntryPoint<GameController>();
             builder.RegisterEntryPoint<FootballersController>();
             builder.RegisterEntryPoint<BallPositionController>();
+            builder.RegisterEntryPoint<InputHandler>().As<IInputProvider>();
         }
     }
 }

@@ -6,7 +6,6 @@ using Src.Factories;
 using Src.Model;
 using Src.Providers;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using VContainer.Unity;
 
 namespace Src.Controllers.FootballersController
@@ -26,6 +25,7 @@ namespace Src.Controllers.FootballersController
         private readonly DefenderBehaviourProcessor _defenderBehaviourProcessor;
         private readonly UndefinedRoleBehaviourProcessor _undefinedRoleBehaviour;
         private readonly DefineRolesLogic _defineRolesLogic;
+        private readonly IInputProvider _inputProvider;
 
         private int _fixedTicksCounter = 0;
 
@@ -40,7 +40,8 @@ namespace Src.Controllers.FootballersController
             AttackerSupportBehaviourProcessor attackerSupportBehaviourProcessor,
             DefenderBehaviourProcessor defenderBehaviourProcessor,
             UndefinedRoleBehaviourProcessor undefinedRoleBehaviour,
-            DefineRolesLogic defineRolesLogic)
+            DefineRolesLogic defineRolesLogic,
+            IInputProvider inputProvider)
         {
             _unitFactory = unitFactory;
             _startPointsProvider = startPointsProvider;
@@ -53,6 +54,7 @@ namespace Src.Controllers.FootballersController
             _defenderBehaviourProcessor = defenderBehaviourProcessor;
             _undefinedRoleBehaviour = undefinedRoleBehaviour;
             _defineRolesLogic = defineRolesLogic;
+            _inputProvider = inputProvider;
         }
         
         public void Start()
@@ -147,7 +149,7 @@ namespace Src.Controllers.FootballersController
             const float deltaTime = 0.005f;
             const float defaultFixedDeltaTime = 0.02f;
             
-            if (Keyboard.current.spaceKey.isPressed)
+            if (_inputProvider.IsAttacking)
             {
                 unit.SetHittingBallState(_cameraDirectionProvider.Forward, 50, 7);
 
@@ -168,7 +170,7 @@ namespace Src.Controllers.FootballersController
                 Time.fixedDeltaTime = Time.timeScale * defaultFixedDeltaTime;
             }
 
-            if (Keyboard.current.leftShiftKey.isPressed)
+            if (_inputProvider.IsSprinting)
             {
                 _playerControlledUnitProvider.TargetUnit.SetMaxSpeed(30);
             }
@@ -195,27 +197,9 @@ namespace Src.Controllers.FootballersController
 
         private Vector3 GetDirectionLocalVectorByKeyboard()
         {
-            var result = Vector3.zero;
+            var moveVector = _inputProvider.MoveVectorNormalized;
             
-            var keyboard = Keyboard.current;
-            if (keyboard.wKey.isPressed)
-            {
-                result.z += 1;
-            }
-            if (keyboard.sKey.isPressed)
-            {
-                result.z -= 1;
-            }
-            if (keyboard.dKey.isPressed)
-            {
-                result.x += 1;
-            }
-            if (keyboard.aKey.isPressed)
-            {
-                result.x-= 1;
-            }
-
-            return result;
+            return new Vector3(moveVector.x, 0, moveVector.y);
         }
     }
 }
